@@ -63,13 +63,13 @@ StringResponse HandleRequest(StringRequest&& req) {
     };
     if(req.method() == http::verb::get || req.method() == http::verb::head)
     {
-        std::string str = "<strong>Hello"; //</strong>
+        std::string str = "Hello"; //</strong>
         if(req.target().substr(1).size() > 0)
         {
             str.append(", ");
             str.append(req.target().substr(1));
         }
-        str.append("</strong>");
+        // str.append("</strong>");
         std::string_view sv_str(str);
         // Здесь можно обработать запрос и сформировать ответ, но пока всегда отвечаем: Hello
         return text_response(http::status::ok, sv_str/*"<strong>Hello</strong>"sv*/);
