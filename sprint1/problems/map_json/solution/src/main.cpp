@@ -12,9 +12,6 @@
 
 
 #include <boost/json.hpp>
-// Этот заголовочный файл надо подключить в одном и только одном .cpp-файле программы
-// #include <boost/json/src.hpp>
-// #define BOOST_BEAST_USE_STD_STRING_VIEW
 
 using namespace std::literals;
 namespace net = boost::asio;
@@ -49,12 +46,6 @@ int main(int argc, const char* argv[]) {
     const auto address = net::ip::make_address("0.0.0.0");
     constexpr unsigned short port = 8080;
     
-    // auto json_str = R"({"name": "Harry Potter"})";
-
-    // auto value = json::parse({json_str.data(), json_str.length()});
-    // auto value = json::parse(json_str);
-    // std::cout << value.as_object().at("name") << std::endl; // Harry Potter
-    // std::cout << json::serialize(value) << std::endl; // {"name": "Harry Potter"}
     try {
         // 1. Загружаем карту из файла и построить модель игры
         model::Game game = json_loader::LoadGame(argv[1]);

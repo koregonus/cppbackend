@@ -41,18 +41,14 @@ void parse_map(const json::value& map, model::Game& game)
         auto map_id = std::make_shared<std::string>(std::move(map.at("id").as_string()));
         auto map_name = std::make_shared<std::string>(std::move(map.at("name").as_string()));
         model::Map::Id id(*map_id);
-        // Id id(*map_id);
-        // model::Map local_map(id, *map_name);
 
         model::Map local_map(id, *map_name);
 
-        // auto roads_array = std::make_shared<std::string>(std::move(map.at("roads").as_array()));
         if(map.as_object().if_contains("roads"))
         {
             auto roads_array = map.at("roads").as_array();
             for(int i = 0; i < roads_array.capacity(); i++)
             {
-                // std::cout << i << std::endl;
                 auto road = map.at("roads").as_array().at(i).as_object();
                 if(road.if_contains("x1"))
                 {   
@@ -79,7 +75,6 @@ void parse_map(const json::value& map, model::Game& game)
             auto buildings_array = map.at("buildings").as_array();
             for(int i = 0; i < buildings_array.capacity(); i++)
             {
-                // std::cout << i << std::endl;
                 auto build = map.at("buildings").as_array().at(i).as_object();
                 try
                 {
@@ -98,7 +93,6 @@ void parse_map(const json::value& map, model::Game& game)
             auto offices_array = map.at("offices").as_array();
             for(int i = 0; i < offices_array.capacity(); i++)
             {
-                // std::cout << i << std::endl;
                 auto office = map.at("offices").as_array().at(i).as_object();
                 try
                 {
@@ -133,7 +127,6 @@ model::Game LoadGame(const std::filesystem::path& json_path) {
     auto value = json::parse(json_from_file);
 
     auto mp = value.as_object().at("maps");
-    // std::size_t maps_cap = mp.as_array().capacity();
 
     model::Game game;
     

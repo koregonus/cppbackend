@@ -123,8 +123,6 @@ StringResponse HandleRequest(StringRequest&& req, model::Game& game) {
 
     if(req.method() == http::verb::get || req.method() == http::verb::head)
     {
-    	// std::cout << "charz: " << req.target().compare(0, MAP_STORAGE_BASED.size(), MAP_STORAGE_BASED) << std::endl;
-    	// std::cout << "charz: " << req.target().compare(0, 5, MAP_STORAGE_BASED, 0, 5) << std::endl;
     	if(!req.target().compare(0, MAP_STORAGE_BASED.size(), MAP_STORAGE_BASED))
     	{
             if(MAP_STORAGE_BASED.size() == req.target().size())
@@ -145,15 +143,12 @@ StringResponse HandleRequest(StringRequest&& req, model::Game& game) {
             {
                 std::string str_buf(req.target().substr(MAP_STORAGE_BASED.size() + 1));
                 const model::Map* map_ptr = game.FindMap(util::Tagged<std::string, model::Map>(str_buf));
-                // std::cout << "try to print custom map: " << str_buf <<  std::endl;
                 if(map_ptr == nullptr)
                 {
-                    // std::cout << "map not found\n";
                     mode = HandleMode::HANDLE_ERR_MAP_NOT_FOUND;
                 }
                 else
                 {
-                    // std::cout << "map found\n";
                     mode = HandleMode::HANDLE_NEED_MAP;
                     obj["id"] = *map_ptr->GetId();
                     obj["name"] = map_ptr->GetName();
@@ -167,39 +162,17 @@ StringResponse HandleRequest(StringRequest&& req, model::Game& game) {
     	}
     	else if(!req.target().compare(0, API_PATH_LEN, MAP_STORAGE_BASED, 0, API_PATH_LEN))
     	{
-            mode = HandleMode::HANDLE_ERR_BAD_REQUEST; // currentlt it's bad request
-    		// std::cout << "need api\n";
+            mode = HandleMode::HANDLE_ERR_BAD_REQUEST; // currently it's bad request
     	}
         else
             mode = HandleMode::HANDLE_UNKNOWN_MODE;
-    	// else
-    	// {
-    	// 	std::cout << MAP_STORAGE_BASED << std::endl;
-    	// 	std::cout << MAP_STORAGE_BASED.size() << std::endl;
-    	// 	std::cout << req.target().substr(0, MAP_STORAGE_BASED.size()) << std::endl;
-    	// 	std::cout << req.target().size() << std::endl;
-    	// }
-        // std::string str = "Hello"; //</strong>
-        // auto maps = game.GetMaps();
-        // model::Map local_map& = maps[0];
-        // json::object local_obj;
-        // local_obj["id"] = 
-        // arr.push_back(local_obj);
-        // obj.insert(local_obj);
+
         std::string str;
         if(mode == HandleMode::HANDLE_NEED_MAPS_LIST)
-            str = (json::serialize(arr)); //</strong>
+            str = (json::serialize(arr));
         else
             str = (json::serialize(obj));
 
-        // std::cout << str << std::endl;
-
-        // if(req.target().substr(1).size() > 0)
-        // {
-        //     str.append(", ");
-        //     str.append(req.target().substr(1));
-        // }
-        // str.append("</strong>");
         std::string_view sv_str(str);
 
         if(mode == HandleMode::HANDLE_ERR_BAD_REQUEST || mode == HandleMode::HANDLE_UNKNOWN_MODE)
@@ -210,9 +183,8 @@ StringResponse HandleRequest(StringRequest&& req, model::Game& game) {
         {
             return json_response(http::status::not_found, R"({"code": "mapNotFound", "message": "Map not found"})"sv);
         }
-        // Здесь можно обработать запрос и сформировать ответ, но пока всегда отвечаем: Hello
-        // return text_response(http::status::ok, sv_str/*"<strong>Hello</strong>"sv*/);
-        return json_response(http::status::ok, sv_str/*"<strong>Hello</strong>"sv*/);
+
+        return json_response(http::status::ok, sv_str);
     }
     else
     {
@@ -221,20 +193,6 @@ StringResponse HandleRequest(StringRequest&& req, model::Game& game) {
     
 }
 
-// Создаёт StringResponse с заданными параметрами
-StringResponse MakeStringResponseJSON(http::status status, std::string_view body, unsigned http_version,
-                                  bool keep_alive, http::verb type,
-                                  std::string_view content_type/* = ContentType::TEXT_HTML*/) {
-	   StringResponse response(status, http_version);
-    response.set(http::field::content_type, content_type);
-    if(type != http::verb::head)
-        response.body() = body;
-    if(status != http::status::ok)
-        response.set(http::field::allow, "GET, HEAD"sv);
-    response.content_length(body.size());
-    response.keep_alive(keep_alive);
-    return response;
-}
 
 StringResponse HandleRequest(StringRequest&& req) {
     const auto text_response = [&req](http::status status, std::string_view text) {
@@ -251,7 +209,7 @@ StringResponse HandleRequest(StringRequest&& req) {
         // str.append("</strong>");
         std::string_view sv_str(str);
         // Здесь можно обработать запрос и сформировать ответ, но пока всегда отвечаем: Hello
-        return text_response(http::status::ok, sv_str/*"<strong>Hello</strong>"sv*/);
+        return text_response(http::status::ok, sv_str);
     }
     else
     {

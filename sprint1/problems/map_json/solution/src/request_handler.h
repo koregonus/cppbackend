@@ -36,30 +36,6 @@ StringResponse HandleRequest(StringRequest&& req);
 StringResponse HandleRequest(StringRequest&& req, model::Game& game);
 
 
-// StringResponse HandleRequest(StringRequest&& req); //{
-//     const auto text_response = [&req](http::status status, std::string_view text) {
-//         return MakeStringResponse(status, text, req.version(), req.keep_alive(), req.method());
-//     };
-//     if(req.method() == http::verb::get || req.method() == http::verb::head)
-//     {
-//         std::string str = "Hello"; //</strong>
-//         if(req.target().substr(1).size() > 0)
-//         {
-//             str.append(", ");
-//             str.append(req.target().substr(1));
-//         }
-//         // str.append("</strong>");
-//         std::string_view sv_str(str);
-//         // Здесь можно обработать запрос и сформировать ответ, но пока всегда отвечаем: Hello
-//         return text_response(http::status::ok, sv_str/*"<strong>Hello</strong>"sv*/);
-//     }
-//     else
-//     {
-//         return text_response(http::status::method_not_allowed, "Invalid method"sv);
-//     }
-    
-// }
-
 class RequestHandler {
 public:
     explicit RequestHandler(model::Game& game)
@@ -72,22 +48,7 @@ public:
     template <typename Body, typename Allocator, typename Send>
     void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {
         // Обработать запрос request и отправить ответ, используя send
-        // const model::Game&& game_ref = game_;
         send(std::move(HandleRequest(std::forward<decltype(req)>(req), game_)));
-
-        // auto map = game_.FindMap(util::Tagged<std::string, model::Map>("map1"));
-        // std::cout << map->GetName() << std::endl;
-
-        // auto buf = map->GetOffices();
-
-        // std::cout << buf[0].GetPosition().x << std::endl;
-        // std::cout << buf[0].GetPosition().y << std::endl;
-
-        // std::cout << "whzoooh!\n";
-        // StringResponse resp = HandleRequest(std::forward<decltype(req)>(req));
-        // send(std::move(resp));
-        // send = HandleRequest(std::forward<decltype(req)>(req));
-        // std::cout << resp << std::endl;
     }
 
 private:
