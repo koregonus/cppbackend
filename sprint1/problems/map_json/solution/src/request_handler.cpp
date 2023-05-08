@@ -89,7 +89,7 @@ json::array GetOfficesFromMap(const model::Map* map_ptr)
         json::object office_obj;
         
         office_obj["id"] = *id;
-        office_obj["x"] = pos.y;
+        office_obj["x"] = pos.x;
         office_obj["y"] = pos.y;
         office_obj["offsetX"] = offset.dx;
         office_obj["offsetY"] = offset.dy;
@@ -148,12 +148,12 @@ StringResponse HandleRequest(StringRequest&& req, model::Game& game) {
                 // std::cout << "try to print custom map: " << str_buf <<  std::endl;
                 if(map_ptr == nullptr)
                 {
-                    std::cout << "map not found\n";
+                    // std::cout << "map not found\n";
                     mode = HandleMode::HANDLE_ERR_MAP_NOT_FOUND;
                 }
                 else
                 {
-                    std::cout << "map found\n";
+                    // std::cout << "map found\n";
                     mode = HandleMode::HANDLE_NEED_MAP;
                     obj["id"] = *map_ptr->GetId();
                     obj["name"] = map_ptr->GetName();
@@ -168,7 +168,7 @@ StringResponse HandleRequest(StringRequest&& req, model::Game& game) {
     	else if(!req.target().compare(0, API_PATH_LEN, MAP_STORAGE_BASED, 0, API_PATH_LEN))
     	{
             mode = HandleMode::HANDLE_ERR_BAD_REQUEST; // currentlt it's bad request
-    		std::cout << "need api\n";
+    		// std::cout << "need api\n";
     	}
         else
             mode = HandleMode::HANDLE_UNKNOWN_MODE;
