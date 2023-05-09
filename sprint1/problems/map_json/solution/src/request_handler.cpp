@@ -9,16 +9,10 @@ namespace http_handler {
 
 	constexpr static std::string_view MAP_STORAGE_BASED = "/api/v1/maps"sv;
 
-	enum class request_error
-	{
-		ERR_MAP_NOT_FOUND,
-		ERR_BAD_REQUEST
-	};
-
 	// Создаёт StringResponse с заданными параметрами
 	StringResponse MakeStringResponse(http::status status, std::string_view body, unsigned http_version,
                                   bool keep_alive, http::verb type,
-                                  std::string_view content_type/* = ContentType::TEXT_HTML*/) {
+                                  std::string_view content_type) {
     StringResponse response(status, http_version);
     response.set(http::field::content_type, content_type);
     if(type != http::verb::head)
@@ -121,6 +115,8 @@ StringResponse HandleRequest(StringRequest&& req, model::Game& game) {
     json::object obj;
     json::array arr;
 
+    StringResponse ret;
+
     if(req.method() == http::verb::get || req.method() == http::verb::head)
     {
     	if(!req.target().compare(0, MAP_STORAGE_BASED.size(), MAP_STORAGE_BASED))
@@ -174,48 +170,28 @@ StringResponse HandleRequest(StringRequest&& req, model::Game& game) {
             str = (json::serialize(obj));
 
         std::string_view sv_str(str);
+  
 
         if(mode == HandleMode::HANDLE_ERR_BAD_REQUEST || mode == HandleMode::HANDLE_UNKNOWN_MODE)
         {
-        	return json_response(http::status::bad_request, R"({"code": "badRequest", "message": "Bad Request"})"sv);/*"{\ncode: badRequest,\nmessage: BadRequest\n}"sv);*/
+            ret = json_response(http::status::bad_request, R"({"code": "badRequest", "message": "Bad Request"})"sv);/*"{\ncode: badRequest,\nmessage: BadRequest\n}"sv);*/
         }
         else if(mode == HandleMode::HANDLE_ERR_MAP_NOT_FOUND)
         {
-            return json_response(http::status::not_found, R"({"code": "mapNotFound", "message": "Map not found"})"sv);
+            ret = json_response(http::status::not_found, R"({"code": "mapNotFound", "message": "Map not found"})"sv);
         }
-
-        return json_response(http::status::ok, sv_str);
+        else
+            ret = json_response(http::status::ok, sv_str); 
+            
     }
     else
     {
-        return text_response(http::status::method_not_allowed, "Invalid method"sv);
+        ret = text_response(http::status::method_not_allowed, "Invalid method"sv);
     }
+
+    return ret;
     
 }
-
-
-StringResponse HandleRequest(StringRequest&& req) {
-    const auto text_response = [&req](http::status status, std::string_view text) {
-        return MakeStringResponse(status, text, req.version(), req.keep_alive(), req.method());
-    };
-    if(req.method() == http::verb::get || req.method() == http::verb::head)
-    {
-        std::string str = "Hello"; //</strong>
-        if(req.target().substr(1).size() > 0)
-        {
-            str.append(", ");
-            str.append(req.target().substr(1));
-        }
-        // str.append("</strong>");
-        std::string_view sv_str(str);
-        // Здесь можно обработать запрос и сформировать ответ, но пока всегда отвечаем: Hello
-        return text_response(http::status::ok, sv_str);
-    }
-    else
-    {
-        return text_response(http::status::method_not_allowed, "Invalid method"sv);
-    }
-    
-}  
+ 
 
 }  // namespace http_handler

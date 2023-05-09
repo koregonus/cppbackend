@@ -27,11 +27,11 @@ StringResponse MakeStringResponse(http::status status, std::string_view body, un
                                   bool keep_alive, http::verb type,
                                   std::string_view content_type = ContentType::TEXT_HTML);
 
-StringResponse MakeStringResponseJSON(http::status status, std::string_view body, unsigned http_version,
-                                  bool keep_alive, http::verb type,
-                                  std::string_view content_type = ContentType::APP_JSON);
+// StringResponse MakeStringResponseJSON(http::status status, std::string_view body, unsigned http_version,
+//                                   bool keep_alive, http::verb type,
+//                                   std::string_view content_type = ContentType::APP_JSON);
 
-StringResponse HandleRequest(StringRequest&& req);
+// StringResponse HandleRequest(StringRequest&& req);
 
 StringResponse HandleRequest(StringRequest&& req, model::Game& game);
 
