@@ -14,42 +14,27 @@
 
 namespace json_loader {
 
-// using namespace std::literals;
+    namespace json = boost::json;
 
-namespace json = boost::json;
-
-
-std::string json_as_string(const std::filesystem::path& json_path)
-{
-    std::ifstream ifs(json_path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
-    std::ifstream::pos_type fileSize = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
-
-    std::vector<char> bytes(fileSize);
-    ifs.read(bytes.data(), fileSize);
-
-    return std::string(bytes.data(), fileSize);
-}
-
-
-void parse_map(const json::value& map, model::Game& game)
-{
-    try
+    static std::string json_as_string(const std::filesystem::path& json_path)
     {
-        if(!(map.as_object().if_contains("id") && map.as_object().if_contains("name")))
-            return;
-        auto map_id = std::make_shared<std::string>(std::move(map.at("id").as_string()));
-        auto map_name = std::make_shared<std::string>(std::move(map.at("name").as_string()));
-        model::Map::Id id(*map_id);
+        std::ifstream ifs(json_path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+        std::ifstream::pos_type fileSize = ifs.tellg();
+        ifs.seekg(0, std::ios::beg);
 
-        model::Map local_map(id, *map_name);
+        std::vector<char> bytes(fileSize);
+        ifs.read(bytes.data(), fileSize);
 
+        return std::string(bytes.data(), fileSize);
+    }
+
+    static void add_roads_to_game(const json::value& map, model::Map& local_map) {
         if(map.as_object().if_contains("roads"))
         {
             auto roads_array = map.at("roads").as_array();
             for(int i = 0; i < roads_array.capacity(); i++)
             {
-                auto road = map.at("roads").as_array().at(i).as_object();
+                auto road = roads_array.at(i).as_object();
                 if(road.if_contains("x1"))
                 {   
                     // horizontal
@@ -70,12 +55,15 @@ void parse_map(const json::value& map, model::Game& game)
                 }
             }
         }
+    }
+
+    static void add_buildings_to_game(const json::value& map, model::Map& local_map) {
         if(map.as_object().if_contains("buildings"))
         {
             auto buildings_array = map.at("buildings").as_array();
             for(int i = 0; i < buildings_array.capacity(); i++)
             {
-                auto build = map.at("buildings").as_array().at(i).as_object();
+                auto build = buildings_array.at(i).as_object();
                 try
                 {
                     model::Point start_point = {(int)build.at("x").get_int64(), (int)build.at("y").get_int64()};
@@ -88,12 +76,15 @@ void parse_map(const json::value& map, model::Game& game)
                 }
             }
         }
+    }
+
+    static void add_offices_to_game(const json::value& map, model::Map& local_map) {
         if(map.as_object().if_contains("offices"))
         {
             auto offices_array = map.at("offices").as_array();
             for(int i = 0; i < offices_array.capacity(); i++)
             {
-                auto office = map.at("offices").as_array().at(i).as_object();
+                auto office = offices_array.at(i).as_object();
                 try
                 {
                     auto office_id = std::make_shared<std::string>(std::move(office.at("id").as_string()));
@@ -109,34 +100,46 @@ void parse_map(const json::value& map, model::Game& game)
                 }
             }
         }
+    }
+
+
+
+    static void parse_map(const json::value& map, model::Game& game)
+    {
+        if(!(map.as_object().if_contains("id") && map.as_object().if_contains("name")))
+            return;
+        auto map_id = std::make_shared<std::string>(std::move(map.at("id").as_string()));
+        auto map_name = std::make_shared<std::string>(std::move(map.at("name").as_string()));
+        model::Map::Id id(*map_id);
+
+        model::Map local_map(id, *map_name);
+
+        add_roads_to_game(map, local_map);
+        add_buildings_to_game(map, local_map);
+        add_offices_to_game(map, local_map);
         
         game.AddMap(local_map);
-
     }
-    catch (const std::exception& ex) {
-        std::cerr << ex.what() << std::endl;
-    }
-}
 
-model::Game LoadGame(const std::filesystem::path& json_path) {
-    // Загрузить содержимое файла json_path, например, в виде строки
-    // Распарсить строку как JSON, используя boost::json::parse
-    // Загрузить модель игры из файла
-    std::string json_from_file = json_as_string(json_path);
+    model::Game LoadGame(const std::filesystem::path& json_path) {
+        // Загрузить содержимое файла json_path, например, в виде строки
+        // Распарсить строку как JSON, используя boost::json::parse
+        // Загрузить модель игры из файла
+        std::string json_from_file = json_as_string(json_path);
 
-    auto value = json::parse(json_from_file);
+        auto value = json::parse(json_from_file);
 
-    auto mp = value.as_object().at("maps");
+        auto mp = value.as_object().at("maps");
 
-    model::Game game;
+        model::Game game;
     
-    for(int i = 0; i < mp.as_array().capacity(); i++)
-    {
-        const json::value& ref_map = mp.as_array().at(i).as_object();
-        model::Game& ref_game = game;
-        parse_map(ref_map, ref_game);
+        for(int i = 0; i < mp.as_array().capacity(); i++)
+        {
+            const json::value& ref_map = mp.as_array().at(i).as_object();
+            model::Game& ref_game = game;
+            parse_map(ref_map, ref_game);
+        }
+        return game;
     }
-    return game;
-}
 
 }  // namespace json_loader
