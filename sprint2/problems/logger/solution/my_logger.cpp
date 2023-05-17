@@ -20,7 +20,7 @@ void Logger::CheckTimestamp()
     {
         const auto t_c = std::chrono::system_clock::to_time_t(now);
         std::ostringstream oss;
-        oss << "/var/logs/sample_log_" << std::put_time(std::localtime(&t_c), "%Y_%m_%d") << ".log";
+        oss << "/var/log/sample_log_" << std::put_time(std::localtime(&t_c), "%Y_%m_%d") << ".log";
         auto str = oss.str();
         log_file_.close();
         log_file_.open(str, std::ios::app);
