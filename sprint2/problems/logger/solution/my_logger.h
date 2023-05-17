@@ -49,7 +49,7 @@ public:
     {
         std::lock_guard<std::mutex> lock(m_);
         CheckTimestamp();
-        log_file_ << GetTimeStamp() << ":";
+        log_file_ << GetTimeStamp() << ": ";
         (log_file_ << ... << args);
         log_file_ << std::endl;
     }
