@@ -179,7 +179,7 @@ public:
         : decorated_(RequestHandler) {
         logging::add_common_attributes();
         logging::add_console_log( 
-            std::clog,
+            std::cout,
             // keywords::format = "{[%TimeStamp%]: %Message%}",
             keywords::format = &MyFormatter,
             keywords::auto_flush = true
