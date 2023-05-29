@@ -50,7 +50,7 @@ void Game::AddGameSession(Map::Id id) {
             const model::Map* map_ptr = FindMap(util::Tagged<std::string, model::Map>(id));
             GameSession session(map_ptr);
             sessions_.emplace_back(std::move(session));
-            std::cout << "session added\n";
+            // std::cout << "session added\n";
         }
         catch (...)
         {
@@ -76,16 +76,24 @@ Dog* GameSession::AddDog(std::string name)
 std::pair<std::string, Player*> Players::AddPlayer(GameSession* session ,Dog* dog_ptr)
 {
     PlayerTokens generator;
+    std::string token = generator.generate_token();
+
     const size_t index = players_.size();
+    // std::cout << "index " << index << std:: endl;
+
     Player& pl = players_.emplace_back(Player{session, dog_ptr});
+    
     try {
-        auto it = players_map.emplace(generator.generate_token(), &pl);
+        auto it = players_map.emplace(token, &pl);
         return *it.first;
     } catch (...) {
         // Удаляем офис из вектора, если не удалось вставить в unordered_map
         players_.pop_back();
         throw;
     }
+    // }
+    
+    
 
     return {0,0};
 
@@ -105,6 +113,23 @@ Player* Players::FindByToken(std::string token)
     }
     return ret;
 }
+
+std::string PlayerTokens::generate_token()
+    {
+        std::stringstream stream;
+        stream << std::hex << generator1_() << generator2_() << generator1_();
+        std::string result( stream.str() );
+        size_t len =  48 - result.length();
+        if(len != 0)
+        {
+            std::cout << "wrong! ::" << len << std::endl;
+        //     stream << std::hex << generator1_();
+        //     std::string buf(stream.str());
+        //     result.append(buf.substr(len));
+        }
+        result.resize(32);
+        return result;
+    }
 
 
 

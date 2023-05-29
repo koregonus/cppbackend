@@ -199,13 +199,21 @@ public:
         generator2_.seed(seed_2+seed_1);
     }
     // ...
-    std::string generate_token()
-    {
-        std::stringstream stream;
-        stream << std::hex << generator1_() << generator2_();
-        std::string result( stream.str() );
-        return result;
-    }
+    std::string generate_token();
+    // {
+    //     std::stringstream stream;
+    //     stream << std::hex << generator1_() << generator2_();
+    //     std::string result( stream.str() );
+    //     size_t len = result.length() - 32;
+    //     if(len != 0)
+    //     {
+    //         std::cout << "wrong! ::" << len << std::endl;
+    //         stream << std::hex << generator1_();
+    //         std::string buf(stream.str());
+    //         result.append(buf.substr(len));
+    //     }
+    //     return result;
+    // }
 private:
     std::random_device random_device_;
     std::mt19937_64 generator1_{[this] {

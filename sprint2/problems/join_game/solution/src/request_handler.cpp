@@ -419,52 +419,56 @@ namespace http_handler {
             else
             {
                 try{
-                    std::string name = boost::json::value_to<std::string>(boost::json::parse(req.body()).at("userName"));
-                    std::string mapid = boost::json::value_to<std::string>(boost::json::parse(req.body()).at("mapId"));
-
-                    const model::Map* map_ptr = game.FindMap(util::Tagged<std::string, model::Map>(mapid));
                 
+                std::string name = boost::json::value_to<std::string>(boost::json::parse(req.body()).at("userName"));
+                std::string mapid = boost::json::value_to<std::string>(boost::json::parse(req.body()).at("mapId"));
+                
+                // try{
+                    const model::Map* map_ptr = game.FindMap(util::Tagged<std::string, model::Map>(mapid));
                     if(name.length() == 0)
                     {
-                    // std::cout << "name\n";
                         ret = json_response(http::status::bad_request, R"({"code": "invalidArgument", "message": "Invalid name"})"sv, true, AllowedMethods::ALLOW_POST);
                     }
                     else if(map_ptr == nullptr)
                     {
-                    // std::cout << "map NULL\n";
                         ret = json_response(http::status::not_found, R"({"code": "mapNotFound", "message": "Map not found"})"sv, true, AllowedMethods::ALLOW_POST);
                     }
                     else // вернуть токен
                     {
-                    // std::cout << "token\n";
-                    // model::Dog doggy(name);
-                        // auto doggy = std::make_shared<model::Dog>(name);
                         model::GameSession* session_ptr = game.FindGameSession(util::Tagged<std::string, model::Map>(mapid));
-                        if(session_ptr == nullptr)
-                        {
-                            // std::cout << "NULL\n";
-                            game.AddGameSession(util::Tagged<std::string, model::Map>(mapid));
-                            session_ptr = game.FindGameSession(util::Tagged<std::string, model::Map>(mapid));
+                        // try{
                             if(session_ptr == nullptr)
                             {
-                                throw;
-                            // std::cout << (uint64_t)session_ptr << std::endl;
+                            // std::cout << "NULL\n";
+                                game.AddGameSession(util::Tagged<std::string, model::Map>(mapid));
+                                session_ptr = game.FindGameSession(util::Tagged<std::string, model::Map>(mapid));
+                                if(session_ptr == nullptr)
+                                {
+                                    throw;
+                                }
                             }
-                        }
-                    // model::Dog doggy(name);
+                        
                         auto new_dog = session_ptr->AddDog(name);
+                        if(new_dog == nullptr)
+                            std::cout << "dog null\n";
                         auto buf = players_.AddPlayer(session_ptr, new_dog);
+                        std::cout << buf.first << "___" << *buf.second->GetId() << std::endl;
+
                         obj["authToken"] = buf.first;
                         obj["playerId"] = *buf.second->GetId();
                         std::string str;
+
                         str = (json::serialize(obj));
                         std::string_view sv_str(str);
                         ret = json_response(http::status::ok, sv_str, true, AllowedMethods::ALLOW_POST);
+
                     // ret = json_response(http::status::ok, R"({"authToken": "invalidArgument", "message": "Invalid name"})"sv, true);
-                }
+                    }
 
                 } catch (...)
                 {
+
+
                     ret = json_response(http::status::bad_request, R"({"code": "invalidArgument", "message": "Join game request parse error"})"sv, true, AllowedMethods::ALLOW_POST);
                 } 
             }
