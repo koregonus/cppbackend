@@ -510,7 +510,7 @@ namespace http_handler {
                     std::string str;
                     str = (json::serialize(obj));
                     std::string_view sv_str(str);
-                    ret = json_response(http::status::ok, sv_str, false, AllowedMethods::ALLOW_GET_HEAD);
+                    ret = json_response(http::status::ok, std::move(sv_str), true, AllowedMethods::ALLOW_GET_HEAD);
                 }
 
                 // std::cout << received_token << std::endl;
