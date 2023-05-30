@@ -480,6 +480,7 @@ namespace http_handler {
                 try{
                 // std::cout << "IMA HERE_1\n";
                 std::string_view local_bearer_buf = req.base().at(http::field::authorization);
+                // std::cout << local_bearer_buf << std::endl;
                 std::string received_token(local_bearer_buf.substr(7));
                 // std::cout << "IMA HERE_2\n";
                 model::Player* buffered_player = players_.FindByToken(received_token);
@@ -492,12 +493,13 @@ namespace http_handler {
                 {
                     // std::cout << "IMA HERE_3\n";
                     model::GameSession* session_ptr = buffered_player->GetSession();
-                    // std::cout << "IMA HERE_4" << ":" << buffered_player->val << std::endl;;
+                    // std::cout << "IMA HERE_4" << ":" << std::endl;;
                     // std::cout << "session ptr req:: " << std::hex << (uint64_t)session_ptr << std::endl;
 
+                    // std::cout << "IMA HERE_5\n";
                     auto dogs = session_ptr->GetDogs();
 
-                    // std::cout << "IMA HERE_5\n";
+                    // std::cout << "IMA HERE_5*\n";
 
                     for(int i = 0; i < dogs.size(); i++)
                     {   

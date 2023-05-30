@@ -304,7 +304,7 @@ public:
     Player* FindByDogIdAndMapId(std::string dog_id, std::string map_id);
     Player* FindByToken(std::string token);
 private:
-    std::vector<Player> players_;
+    std::vector<Player*> players_;
     std::unordered_map<std::string, Player*> players_map;
 
 
