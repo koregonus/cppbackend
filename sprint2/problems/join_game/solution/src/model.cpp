@@ -48,8 +48,8 @@ void Game::AddGameSession(Map::Id id) {
     } else {
         try{
             const model::Map* map_ptr = FindMap(util::Tagged<std::string, model::Map>(id));
-            GameSession session(map_ptr);
-            sessions_.emplace_back(std::move(session));
+            // GameSession* session = new GameSession(map_ptr);
+            sessions_.emplace_back(GameSession{map_ptr});
             // std::cout << "session added\n";
         }
         catch (...)
@@ -79,12 +79,20 @@ std::pair<std::string, Player*> Players::AddPlayer(GameSession* session ,Dog* do
     std::string token = generator.generate_token();
 
     const size_t index = players_.size();
-    // std::cout << "index " << index << std:: endl;
+    // std::cout << "index: " << index << std:: endl;
 
-    Player& pl = players_.emplace_back(Player{session, dog_ptr});
+    // Player* player = new Player(session, dog_ptr);
+
+    players_.emplace_back(Player{session, dog_ptr});
+
+    // std::cout << "player ptr " << std::hex << (uint64_t)&players_[index] << std::endl;
+
+    // std::cout << "session ptr add:: " << std::hex << (uint64_t)session << std::endl;
     
     try {
-        auto it = players_map.emplace(token, &pl);
+        auto it = players_map.emplace(std::move(token), &players_[index]);
+        if(it.second == true)
+            std::cout << "OK\n";
         return *it.first;
     } catch (...) {
         // Удаляем офис из вектора, если не удалось вставить в unordered_map
@@ -107,7 +115,7 @@ Player* Players::FindByToken(std::string token)
     {
         ret = players_map.at(token);
     }
-    catch(std::out_of_range&)
+    catch(...)
     {
         ret = nullptr;
     }

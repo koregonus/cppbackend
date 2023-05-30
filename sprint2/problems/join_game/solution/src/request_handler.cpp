@@ -449,11 +449,10 @@ namespace http_handler {
                             }
                         
                         auto new_dog = session_ptr->AddDog(name);
-                        if(new_dog == nullptr)
-                            std::cout << "dog null\n";
+                        // if(new_dog == nullptr)
+                        //     std::cout << "dog null\n";
                         auto buf = players_.AddPlayer(session_ptr, new_dog);
-                        std::cout << buf.first << "___" << *buf.second->GetId() << std::endl;
-
+                        
                         obj["authToken"] = buf.first;
                         obj["playerId"] = *buf.second->GetId();
                         std::string str;
@@ -479,17 +478,26 @@ namespace http_handler {
             if(req.method() == http::verb::get || req.method() == http::verb::head)
             {
                 try{
+                // std::cout << "IMA HERE_1\n";
                 std::string_view local_bearer_buf = req.base().at(http::field::authorization);
                 std::string received_token(local_bearer_buf.substr(7));
+                // std::cout << "IMA HERE_2\n";
                 model::Player* buffered_player = players_.FindByToken(received_token);
+                // std::cout << "player ptr req:: " << std::hex << (uint64_t)buffered_player << std::endl;
                 if(buffered_player == nullptr)
                 {
                     ret = json_response(http::status::unauthorized, R"({"code": "unknownToken", "message": "Player token has not been found"})"sv, true, AllowedMethods::ALLOW_POST);
                 }
                 else
                 {
+                    // std::cout << "IMA HERE_3\n";
                     model::GameSession* session_ptr = buffered_player->GetSession();
+                    // std::cout << "IMA HERE_4" << ":" << buffered_player->val << std::endl;;
+                    // std::cout << "session ptr req:: " << std::hex << (uint64_t)session_ptr << std::endl;
+
                     auto dogs = session_ptr->GetDogs();
+
+                    // std::cout << "IMA HERE_5\n";
 
                     for(int i = 0; i < dogs.size(); i++)
                     {   
@@ -498,6 +506,7 @@ namespace http_handler {
                         local_obj["name"] = dogs[i].GetName();
                         obj[std::to_string(*dogs[i].GetId())] = local_obj;
                     }
+                    // std::cout << "IMA HERE_6\n";
                     std::string str;
                     str = (json::serialize(obj));
                     std::string_view sv_str(str);
