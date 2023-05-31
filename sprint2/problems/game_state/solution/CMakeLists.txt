@@ -1,0 +1,42 @@
+cmake_minimum_required(VERSION 3.11)
+
+project(game_server CXX)
+set(CMAKE_CXX_STANDARD 20)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
+get_property(importTargets DIRECTORY "${CMAKE_SOURCE_DIR}" PROPERTY IMPORTED_TARGETS)
+message(STATUS "${importTargets}") 
+
+find_package(Boost 1.78.0 REQUIRED)
+# if(Boost_FOUND)
+#   # target_include_directories больше не требуется
+#   # include_directories(${Boost_INCLUDE_DIRS})
+# endif()
+
+add_compile_definitions(BOOST_BEAST_USE_STD_STRING_VIEW)
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+add_executable(game_server
+	src/main.cpp
+	src/http_server.cpp
+	src/http_server.h
+	src/sdk.h
+	src/model.h
+	src/model.cpp
+	src/tagged.h
+	src/boost_json.cpp
+	src/json_loader.h
+	src/json_loader.cpp
+	src/request_handler.cpp
+	src/request_handler.h
+	src/application.cpp
+	src/application.h
+	src/http_req_resp_support.cpp
+	src/http_req_resp_support.h
+)
+target_link_libraries(game_server PRIVATE Threads::Threads)
+target_link_libraries(game_server PRIVATE CONAN_PKG::boost)
