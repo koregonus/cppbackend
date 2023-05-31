@@ -4,6 +4,8 @@
 #include <optional>
 #include <iostream>
 
+#include <stdexcept>
+
 namespace json = boost::json;
 
 
@@ -18,6 +20,8 @@ std::optional<std::string> TryExtractToken(const StringRequest& request)
   	try{
        	std::string_view local_bearer_buf = request.base().at(http::field::authorization);
        	std::string received_token(local_bearer_buf.substr(7));
+       	if(received_token.size() < 32)
+       		throw  std::length_error("token length");
        	return received_token;
    	} catch(...)
    	{

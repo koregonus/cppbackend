@@ -94,8 +94,9 @@ std::pair<std::string, Player*> Players::AddPlayer(GameSession* session ,Dog* do
     
     try {
         auto it = players_map.emplace(std::move(token), player);
-        if(it.second == true)
-            std::cout << "OK\n";
+        // Проверка на добавление в мапу, обработки нет поэтому пока отключена.
+        // if(it.second == true)
+        //     std::cout << "OK\n";
         return *it.first;
     } catch (...) {
         // Удаляем офис из вектора, если не удалось вставить в unordered_map
