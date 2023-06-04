@@ -313,7 +313,7 @@ public:
         coords_.direction = dir;
     }
 
-    void Update(int tick_ms);
+    void Update(double tick_ms);
 
 private:
     Dog_mv_param coords_;
@@ -348,7 +348,7 @@ public:
 
     Dog* AddDog(std::string name, double x, double y, const Map* road_ptr, int road_idx);
 
-    void UpdateDogs(int tick_ms);
+    void UpdateDogs(double tick_ms);
 
 private:
     std::vector<Dog> dogs_;
@@ -425,7 +425,7 @@ public:
         return nullptr;
     }
 
-    void UpdateSessionsTime(int tick_ms);
+    void UpdateSessionsTime(double tick_ms);
 
 private:
     using MapIdHasher = util::TaggedHasher<Map::Id>;

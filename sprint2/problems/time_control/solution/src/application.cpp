@@ -58,9 +58,9 @@ static std::string consider_dog_direction(int dir)
 	else if(dir == 1)
 		ret.append("D");
 	else if (dir == 2)
-		ret.append("W");
+		ret.append("L");
 	else if (dir == 3)
-		ret.append("E");
+		ret.append("R");
 	else if(dir == 4)
 		ret = {""};
 	return ret;
@@ -154,7 +154,11 @@ StringResponse ApplicationFacade::PlayersState(StringRequest& req)
     			arr_speed.push_back(params.vy);
     			local_obj["pos"] = arr_pos;
     			local_obj["speed"] = arr_speed;
-    			local_obj["dir"] = consider_dog_direction(params.direction);
+    			if(params.direction < 4)
+    				local_obj["dir"] = consider_dog_direction(params.direction);
+    			else
+    				local_obj["dir"] = "";
+
         		obj[std::to_string(*dogs[i].GetId())] = local_obj;
     		}
     		json::value players_data{{"players"s,obj}};
@@ -204,17 +208,18 @@ StringResponse ApplicationFacade::SetPlayerAction(StringRequest& req) {
 					else if(move == "U")
 					{
 						dir = 0;
-						dog_speed_basis = {0,1};
+						dog_speed_basis = {0,-1};
 					}
 					else if(move == "D")
 					{
 						dir = 1;
-						dog_speed_basis = {0,-1};
+						dog_speed_basis = {0,1};
 					}
 					else if(move == "")
 					{
-						dir == 4;
+						dir = 4;
 						dog_speed_basis = {0,0};
+						std::cout << "move nothing\n";
 					}
 					else
 						normal_mode = false;
@@ -270,9 +275,11 @@ StringResponse ApplicationFacade::TimerTick(StringRequest& req) {
 		// 	else
 		// 	{
 				try{
-					if(!(boost::json::parse(req.body()).at("timeDelta").is_number()))
+					if(!((boost::json::parse(req.body()).at("timeDelta").is_number()) || (boost::json::parse(req.body()).at("timeDelta").is_double())))
     					throw  std::invalid_argument("not number");	
-    				int tick_time = boost::json::value_to<int>(boost::json::parse(req.body()).at("timeDelta"));
+
+    				double tick_time = 0.0;
+    				tick_time = boost::json::value_to<double>(boost::json::parse(req.body()).at("timeDelta"));
     				
 					// int tick_time = std::stoi(tick);
 					// std::cout << "tick" << tick_time << std::endl;
@@ -310,7 +317,7 @@ StringResponse ApplicationFacade::TimerTick(StringRequest& req) {
 
 		if(!normal_mode)
 		{
-			ret = MakeStringResponse(http::status::bad_request, R"({"code":"invalidArgument, "message": "Failed to parse tick request JSON})"sv,
+			ret = MakeStringResponse(http::status::bad_request, R"({"code":"invalidArgument, "message": "Failed to parse tick request JSON"})"sv,
 								 req.version(), req.keep_alive(), req.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
 		}
     	return ret;

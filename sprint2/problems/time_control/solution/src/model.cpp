@@ -121,24 +121,24 @@ void Game::AddGameSession(Map::Id id) {
     }
 }
 
-void GameSession::UpdateDogs(int tick_ms)
+void GameSession::UpdateDogs(double tick_ms)
 {
 
     for(auto it = dogs_.begin(); it < dogs_.end(); it++)
     {
-        std::cout << "update dogs\n";
+        // std::cout << "update dogs\n";
         it->Update(tick_ms);
     }
 }
 
-void Game::UpdateSessionsTime(int tick_ms)
+void Game::UpdateSessionsTime(double tick_ms)
 {
-    std::cout << "ses size " << sessions_.size() << std:: endl;
+    // std::cout << "ses size " << sessions_.size() << std:: endl;
     if(sessions_.size() == 0)
         return;
     for(auto it = sessions_.begin(); it < sessions_.end(); it++)
     {
-        std::cout << "update ses\n";
+        // std::cout << "update ses\n";
         it->UpdateDogs(tick_ms);
     }
 }
@@ -159,13 +159,13 @@ Dog* GameSession::AddDog(std::string name, double x, double y, const model::Map*
 
 
 
-void Dog::Update(int tick_ms)
+void Dog::Update(double tick_ms)
 {
     if(coords_.direction == 4)
         return;
     // std::cout << "update one doggy\n";
-    double dx = coords_.vx * ((double)tick_ms)/1000.0f;
-    double dy = coords_.vy * ((double)tick_ms)/1000.0f;
+    double dx = coords_.vx * (tick_ms)/1000.0;
+    double dy = coords_.vy * (tick_ms)/1000.0;
 
     double next_p_x = coords_.x + dx;
     double next_p_y = coords_.y + dy;
@@ -177,7 +177,7 @@ void Dog::Update(int tick_ms)
     bool next_road_found = false;
     if(roads[current_road_idx].PointIsWithinRoad(next_p_x, next_p_y))
     {
-        std::cout << "Within\n";
+        // std::cout << "Within\n";
         coords_.x = next_p_x;
         coords_.y = next_p_y;
         next_road_found = true;
@@ -186,9 +186,9 @@ void Dog::Update(int tick_ms)
     {
         if(coords_.direction == 2 || coords_.direction == 3)
         {
-            std::cout << "check hor roads\n";
+            // std::cout << "check hor roads\n";
             auto hor_roads = map_ptr_->GetHorRoads();
-            std::cout << " num ::" << hor_roads.size() << std::endl;
+            // std::cout << " num ::" << hor_roads.size() << std::endl;
             for(auto it = hor_roads.begin(); it < hor_roads.end(); it++)
             {
                 if(*it == current_road_idx)
@@ -205,9 +205,9 @@ void Dog::Update(int tick_ms)
         }
         else if(coords_.direction == 0 || coords_.direction == 1)
         {
-            std::cout << "check ver roads\n";
+            // std::cout << "check ver roads\n";
             auto ver_roads = map_ptr_->GetVerRoads();
-            std::cout << " num ::" << ver_roads.size() << std::endl;
+            // std::cout << " num ::" << ver_roads.size() << std::endl;
             for(auto it = ver_roads.begin(); it < ver_roads.end(); it++)
             {
                 if(*it == current_road_idx)
