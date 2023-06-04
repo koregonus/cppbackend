@@ -88,7 +88,7 @@ StringResponse ApplicationFacade::ListMap(StringRequest req)
     std::string_view sv_str(str);
 
     return MakeStringResponse(http::status::ok, sv_str, req.version(), req.keep_alive(), 
-    							req.method(), false, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
+    							req.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
 }
 
 
