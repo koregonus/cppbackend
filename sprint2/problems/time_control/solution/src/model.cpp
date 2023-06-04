@@ -163,6 +163,7 @@ void Dog::Update(double tick_ms)
 {
     if(coords_.direction == 4)
         return;
+    // auto speed = map_ptr->GetDogSpeed();
     // std::cout << "update one doggy\n";
     double dx = coords_.vx * (tick_ms)/1000.0;
     double dy = coords_.vy * (tick_ms)/1000.0;
@@ -225,7 +226,7 @@ void Dog::Update(double tick_ms)
     }
     if(!next_road_found)
     {
-        std::cout << "road not found\n";
+        // std::cout << "road not found\n";
         if(coords_.direction == 0)
         {
             // std::cout << "UpBound\n";
@@ -246,6 +247,8 @@ void Dog::Update(double tick_ms)
             // std::cout << "RightBound\n";
             coords_.x = roads[current_road_idx].RightBound();
         }
+        coords_.vx = 0.0;
+        coords_.vy = 0.0;
     }
     std::cout << "current idx::" << current_road_idx << std:: endl;
     std::cout << "next coords real:" << coords_.x << " " << coords_.y << std::endl;

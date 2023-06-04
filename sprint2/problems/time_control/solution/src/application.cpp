@@ -219,7 +219,7 @@ StringResponse ApplicationFacade::SetPlayerAction(StringRequest& req) {
 					{
 						dir = 4;
 						dog_speed_basis = {0,0};
-						std::cout << "move nothing\n";
+						// std::cout << "move nothing\n";
 					}
 					else
 						normal_mode = false;
