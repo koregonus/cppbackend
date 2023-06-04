@@ -169,7 +169,7 @@ void Dog::Update(double tick_ms)
     int lag_count = 0;
     double tick_buff = 0.0;
     double tick_tail = 0.0;
-    if(tick_ms > 100.0)
+    if(tick_ms > 500.0)
     {
         // std::cout << "big move\n";
         lag_count = (int)(tick_ms/100.0);
