@@ -567,7 +567,7 @@ namespace http_handler {
                 // ret = json_response(http::status::ok, sv_str);
                 // break; 
             case (HandleMode::HANDLE_NEED_MAP):
-                ret = json_response(http::status::ok, sv_str, false, AllowedMethods::ALLOW_GET_HEAD);
+                ret = json_response(http::status::ok, sv_str, true, AllowedMethods::ALLOW_GET_HEAD);
                 break;
             case (HandleMode::HANDLE_ERR_BAD_REQUEST):
             default:
