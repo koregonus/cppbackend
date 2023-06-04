@@ -256,7 +256,7 @@ StringResponse ApplicationFacade::SetPlayerAction(StringRequest& req) {
 
 
 StringResponse ApplicationFacade::TimerTick(StringRequest& req) {
-    std::cout << "TICK:: \n" << std::endl;
+    // std::cout << "TICK:: \n" << std::endl;
     // return ExecuteAuthorized(req, [&req, players = &players_](const std::string& token){
     		StringResponse ret;
 
@@ -275,15 +275,15 @@ StringResponse ApplicationFacade::TimerTick(StringRequest& req) {
 		// 	else
 		// 	{
 				try{
-					if(!((boost::json::parse(req.body()).at("timeDelta").is_number()) || (boost::json::parse(req.body()).at("timeDelta").is_double())))
+					if(!((boost::json::parse(req.body()).at("timeDelta").is_number())))
     					throw  std::invalid_argument("not number");	
 
-    				double tick_time = 0.0;
-    				tick_time = boost::json::value_to<double>(boost::json::parse(req.body()).at("timeDelta"));
+    				// double tick_time_d = 0.0;
+    				int tick_time = boost::json::value_to<int>(boost::json::parse(req.body()).at("timeDelta"));
     				
 					// int tick_time = std::stoi(tick);
 					// std::cout << "tick" << tick_time << std::endl;
-					game_.UpdateSessionsTime(tick_time);
+					game_.UpdateSessionsTime((double)tick_time);
     				// std::pair<int,int> dog_speed_basis;
 		// 			if(move == "L")
 		// 				dog_speed_basis = {-1,0};
@@ -317,7 +317,7 @@ StringResponse ApplicationFacade::TimerTick(StringRequest& req) {
 
 		if(!normal_mode)
 		{
-			ret = MakeStringResponse(http::status::bad_request, R"({"code":"invalidArgument, "message": "Failed to parse tick request JSON"})"sv,
+			ret = MakeStringResponse(http::status::bad_request, R"({"code":"invalidArgument", "message": "Failed to parse tick request JSON"})"sv,
 								 req.version(), req.keep_alive(), req.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
 		}
     	return ret;
