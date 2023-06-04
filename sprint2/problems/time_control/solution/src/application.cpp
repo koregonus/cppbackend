@@ -111,8 +111,8 @@ StringResponse ApplicationFacade::PlayersList(StringRequest& req)
     		for(int i = 0; i < dogs.size(); i++)
     		{   
     			json::object local_obj;
-    			local_obj["name"] = dogs[i].GetName();
-        		obj[std::to_string(*dogs[i].GetId())] = local_obj;
+    			local_obj["name"] = dogs[i]->GetName();
+        		obj[std::to_string(*dogs[i]->GetId())] = local_obj;
     		}
     		std::string str;
     		str = json::serialize(obj);
@@ -145,7 +145,7 @@ StringResponse ApplicationFacade::PlayersState(StringRequest& req)
     		for(int i = 0; i < dogs.size(); i++)
     		{   
     			json::object local_obj;
-    			auto params = dogs[i].GetDogParams();
+    			auto params = dogs[i]->GetDogParams();
     			json::array arr_pos;
     			arr_pos.push_back(params.x);
     			arr_pos.push_back(params.y);
@@ -159,7 +159,7 @@ StringResponse ApplicationFacade::PlayersState(StringRequest& req)
     			else
     				local_obj["dir"] = "";
 
-        		obj[std::to_string(*dogs[i].GetId())] = local_obj;
+        		obj[std::to_string(*dogs[i]->GetId())] = local_obj;
     		}
     		json::value players_data{{"players"s,obj}};
     		std::string str;
@@ -276,7 +276,10 @@ StringResponse ApplicationFacade::TimerTick(StringRequest& req) {
 		// 	{
 				try{
 					if(!((boost::json::parse(req.body()).at("timeDelta").is_number())))
-    					throw  std::invalid_argument("not number");	
+    					throw  std::invalid_argument("not number");
+
+    				if(boost::json::parse(req.body()).at("timeDelta").is_double())
+    					throw std::invalid_argument("not number");
 
     				// double tick_time_d = 0.0;
     				int tick_time = boost::json::value_to<int>(boost::json::parse(req.body()).at("timeDelta"));

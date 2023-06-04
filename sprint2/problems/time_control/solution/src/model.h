@@ -104,11 +104,12 @@ public:
     }
 
     double UpBound() const noexcept{
-        return (((double)(start_.y <= end_.y)?end_.y:start_.y) + 0.4);
+        return (((double)(start_.y <= end_.y)?start_.y:end_.y) - 0.4);
+        
     }
 
     double LowBound() const noexcept{
-        return (((double)(start_.y <= end_.y)?start_.y:end_.y) - 0.4);
+        return (((double)(start_.y <= end_.y)?end_.y:start_.y) + 0.4);
     }
 
     bool PointIsWithinRoad(double x, double y) const;
@@ -337,7 +338,7 @@ public:
         return map_ptr_->GetId();
     }
 
-    const Dogs& GetDogs() const noexcept {
+    const std::vector<Dog*>& GetDogs() const noexcept {
         return dogs_;
     }
 
@@ -351,7 +352,7 @@ public:
     void UpdateDogs(double tick_ms);
 
 private:
-    std::vector<Dog> dogs_;
+    std::vector<Dog*> dogs_;
     const Map* map_ptr_;
 };
 

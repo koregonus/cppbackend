@@ -127,7 +127,7 @@ void GameSession::UpdateDogs(double tick_ms)
     for(auto it = dogs_.begin(); it < dogs_.end(); it++)
     {
         // std::cout << "update dogs\n";
-        it->Update(tick_ms);
+        (*it)->Update(tick_ms);
     }
 }
 
@@ -139,17 +139,19 @@ void Game::UpdateSessionsTime(double tick_ms)
     for(auto it = sessions_.begin(); it < sessions_.end(); it++)
     {
         // std::cout << "update ses\n";
-        it->UpdateDogs(tick_ms);
+        (*it).UpdateDogs(tick_ms);
     }
 }
 
 Dog* GameSession::AddDog(std::string name, double x, double y, const model::Map* map_ptr, int idx)
 {
-    Dog* ret = nullptr;
+    // Dog* ret = nullptr;
     const size_t index = dogs_.size();
+    Dog* ret = new Dog(name, x, y, map_ptr, idx);
     try{
-        dogs_.emplace_back(Dog{name, x, y, map_ptr, idx});
-        ret = &dogs_[index];
+        // dogs_.emplace_back(Dog{name, x, y, map_ptr, idx});
+        dogs_.push_back(ret);
+        ret = dogs_[index];
     }
     catch(...){
         throw;
@@ -229,29 +231,32 @@ void Dog::Update(double tick_ms)
         // std::cout << "road not found\n";
         if(coords_.direction == 0)
         {
-            // std::cout << "UpBound\n";
+            // std::cout << "UpBound:" << roads[current_road_idx].UpBound() << std::endl;
             coords_.y = roads[current_road_idx].UpBound();
         }
         else if(coords_.direction == 1)
         {
             // std::cout << "LowBound\n";
+            // std::cout << "LowBound:" << roads[current_road_idx].LowBound() << std::endl;
             coords_.y = roads[current_road_idx].LowBound();
         }
         else if(coords_.direction == 2)
         {
             // std::cout << "LeftBound\n";
+            // std::cout << "LeftBound:" << roads[current_road_idx].LeftBound() << std::endl;
             coords_.x = roads[current_road_idx].LeftBound();
         }
         else if(coords_.direction == 3)
         {
             // std::cout << "RightBound\n";
+            // std::cout << "RightBound:" << roads[current_road_idx].RightBound() << std::endl;
             coords_.x = roads[current_road_idx].RightBound();
         }
         coords_.vx = 0.0;
         coords_.vy = 0.0;
     }
-    std::cout << "current idx::" << current_road_idx << std:: endl;
-    std::cout << "next coords real:" << coords_.x << " " << coords_.y << std::endl;
+    // std::cout << "current idx::" << current_road_idx << std:: endl;
+    // std::cout << "next coords real:" << coords_.x << " " << coords_.y << std::endl;
 }
 
 std::pair<std::string, Player*> Players::AddPlayer(GameSession* session ,Dog* dog_ptr)
