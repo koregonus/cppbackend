@@ -11,6 +11,7 @@
 namespace model {
 using namespace std::literals;
 
+
 int Dog::dog_count = 0;
 
 
@@ -18,44 +19,33 @@ bool Road::PointIsWithinRoad(double x, double y) const
 {
     bool check_y = false;
     
-    
     if(end_.x >= start_.x)
     {
-        // std::cout << "1\n";
-        // std::cout << "X start:" << x << ">=" << ((double)(start_.x)) - 4E-1 << std::endl;
-        // std::cout << "X end:" << x << "<=" << ((double)(end_.x)) + 4E-1 << std::endl;
-        // std::cout << fabs(x-start_.x - 4E-1) << std::endl;
-        // std::cout << fabs(x-end_.x + 4E-1) << std::endl;
-        if(!((x >= (double(start_.x) - 4E-1)) && (x <= (double(end_.x) + 4E-1))))
+        if(!((x >= (static_cast<double>(start_.x) - DELTA_ROAD_SIZE_PARAMETER)) && (x <= (static_cast<double>(end_.x) + DELTA_ROAD_SIZE_PARAMETER))))
+        {
             return false;
+        }
     }
     else
     {
-        // std::cout << "2\n";
-        // std::cout << "X start:" << x << "<=" << ((double)(start_.x)) + 4E-1 << std::endl;
-        // std::cout << "X end:" << x << ">=" << ((double)(end_.x)) - 4E-1 << std::endl;
-        // std::cout << fabs(x-start_.x) << std::endl;
-        // std::cout << fabs(x-end_.x-0.4) << std::endl;
-        // if(!((x < (double(start_.x) + 0.4f) || fabs(x-start_.x) < 1E-9) && 
-        //     (x >= (double(end_.x) - 0.4f)) || (fabs(x-end_.x) < 1E-9)))
-        if(!((x <= (double(start_.x) - 4E-1)) && (x >= (double(end_.x) + 4E-1))))
+        if(!((x <= (static_cast<double>(start_.x) - DELTA_ROAD_SIZE_PARAMETER)) && (x >= (static_cast<double>(end_.x) + DELTA_ROAD_SIZE_PARAMETER))))
+        {
             return false;
+        }
     }
     if(end_.y >= start_.y)
     {
-        // std::cout << "3\n";
-        // std::cout << "Y start:" << y << ">=" << ((double)(start_.y)) - 0.4 << std::endl;
-        // std::cout << "Y end:" << y << "<=" << ((double)(end_.y)) + 0.4 << std::endl;
-        if(!(y >= ((double)(start_.y)) - 4E-1 && (y <= ((double)(end_.y) + 4E-1))))
+        if(!((y >= (static_cast<double>(start_.y) - DELTA_ROAD_SIZE_PARAMETER) && (y <= (static_cast<double>(end_.y) + DELTA_ROAD_SIZE_PARAMETER)))))
+        {
             return false;
+        }
     }
     else
     {
-        // std::cout << "4\n";
-        // std::cout << "Y start:" << y << "<=" << ((double)(start_.y)) + 0.4 << std::endl;
-        // std::cout << "Y end:" << y << ">=" << ((double)(end_.y)) - 0.4 << std::endl;
-        if(!(y <= ((double)(start_.y) + 4E-1) && (y >= ((double)(end_.y) - 4E-1))))
+        if(!(y <= (static_cast<double>(start_.y) + DELTA_ROAD_SIZE_PARAMETER) && (y >= (static_cast<double>(end_.y) - DELTA_ROAD_SIZE_PARAMETER))))
+        {
             return false;
+        }
     }
     return true;
 }
@@ -110,9 +100,7 @@ void Game::AddGameSession(Map::Id id) {
     } else {
         try{
             const model::Map* map_ptr = FindMap(util::Tagged<std::string, model::Map>(id));
-            // GameSession* session = new GameSession(map_ptr);
             sessions_.emplace_back(GameSession{map_ptr});
-            // std::cout << "session added\n";
         }
         catch (...)
         {
@@ -126,30 +114,25 @@ void GameSession::UpdateDogs(double tick_ms)
 
     for(auto it = dogs_.begin(); it < dogs_.end(); it++)
     {
-        // std::cout << "update dogs\n";
         (*it)->Update(tick_ms);
     }
 }
 
 void Game::UpdateSessionsTime(double tick_ms)
 {
-    // std::cout << "ses size " << sessions_.size() << std:: endl;
     if(sessions_.size() == 0)
         return;
     for(auto it = sessions_.begin(); it < sessions_.end(); it++)
     {
-        // std::cout << "update ses\n";
         (*it).UpdateDogs(tick_ms);
     }
 }
 
 Dog* GameSession::AddDog(std::string name, double x, double y, const model::Map* map_ptr, int idx)
 {
-    // Dog* ret = nullptr;
     const size_t index = dogs_.size();
     Dog* ret = new Dog(name, x, y, map_ptr, idx);
     try{
-        // dogs_.emplace_back(Dog{name, x, y, map_ptr, idx});
         dogs_.push_back(ret);
         ret = dogs_[index];
     }
@@ -163,18 +146,16 @@ Dog* GameSession::AddDog(std::string name, double x, double y, const model::Map*
 
 void Dog::Update(double tick_ms)
 {
-    // std::cout << "start_doggy\n";
-    if(coords_.direction == 4)
+    if(coords_.direction == DogDirection::DOG_MOVE_STOP)
         return;
     int lag_count = 0;
     double tick_buff = 0.0;
     double tick_tail = 0.0;
-    if(tick_ms > 500.0)
+    if(tick_ms > 5 * LAG_STEP)
     {
-        // std::cout << "big move\n";
-        lag_count = (int)(tick_ms/100.0);
-        tick_buff = 100.0;
-        tick_tail = tick_ms - 100.0*lag_count;
+        lag_count = static_cast<int>(tick_ms / LAG_STEP);
+        tick_buff = LAG_STEP;
+        tick_tail = tick_ms - LAG_STEP*lag_count;
     }
     else
     {
@@ -192,37 +173,32 @@ void Dog::Update(double tick_ms)
         {
             break;
         }
-        // std::cout << "update one doggy\n";
-        double dx = coords_.vx * (tick_buff)/1000.0;
-        double dy = coords_.vy * (tick_buff)/1000.0;
+
+        double dx = coords_.vx * (tick_buff)/1000.0; // tick_buff from millisec to sec
+        double dy = coords_.vy * (tick_buff)/1000.0; // tick_buff from millisec to sec
 
         double next_p_x = coords_.x + dx;
         double next_p_y = coords_.y + dy;
         auto roads = map_ptr_->GetRoads();
-        // std::cout << "cur road ptr " << (uint64_t)current_road << std::endl;
-        // std::cout << "next dx coords :" << dx << " " << dy << std::endl;
-        // std::cout << "coords :" << coords_.x << " " << coords_.y << std::endl;
-        // std::cout << "next coords :" << next_p_x << " " << next_p_y << std::endl;
+
         bool next_road_found = false;
-        std::pair<bool,int> probe_road = {false, 0};
         if(roads[current_road_idx].PointIsWithinRoad(next_p_x, next_p_y))
         {
-            // std::cout << "Within\n";
             coords_.x = next_p_x;
             coords_.y = next_p_y;
             next_road_found = true;
         }
         else
         {
-            if(coords_.direction == 2 || coords_.direction == 3)
+            if(coords_.direction == DogDirection::DOG_MOVE_LEFT || coords_.direction == DogDirection::DOG_MOVE_RIGHT)
             {
-                // std::cout << "check hor roads\n";
                 auto hor_roads = map_ptr_->GetHorRoads();
-                // std::cout << " num ::" << hor_roads.size() << std::endl;
                 for(auto it = hor_roads.begin(); it < hor_roads.end(); it++)
                 {
                     if(*it == current_road_idx)
+                    {
                         continue;
+                    }
                     if(roads[*it].PointIsWithinRoad(next_p_x, next_p_y))
                     {
                         coords_.x = next_p_x;
@@ -233,15 +209,15 @@ void Dog::Update(double tick_ms)
                     }
                 }
             }
-            else if(coords_.direction == 0 || coords_.direction == 1)
+            else if(coords_.direction == DogDirection::DOG_MOVE_UP || coords_.direction == DogDirection::DOG_MOVE_DOWN)
             {
-                // std::cout << "check ver roads\n";
                 auto ver_roads = map_ptr_->GetVerRoads();
-                // std::cout << " num ::" << ver_roads.size() << std::endl;
                 for(auto it = ver_roads.begin(); it < ver_roads.end(); it++)
                 {
                     if(*it == current_road_idx)
+                    {
                         continue;
+                    }
                     if(roads[*it].PointIsWithinRoad(next_p_x, next_p_y))
                     {
                         coords_.x = next_p_x;
@@ -255,139 +231,26 @@ void Dog::Update(double tick_ms)
         }
         if(!next_road_found)
         {
-            // probe road logic
-
-            // move to bounds
-            // check next
-            // 
-            // std::cout << "road not found\n";
-            if(coords_.direction == 0)
+            if(coords_.direction == DogDirection::DOG_MOVE_UP)
             {
-                // std::cout << "UpBound:" << roads[current_road_idx].UpBound() << std::endl;
                 coords_.y = roads[current_road_idx].UpBound();
             }
-            else if(coords_.direction == 1)
+            else if(coords_.direction == DogDirection::DOG_MOVE_DOWN)
             {
-                // std::cout << "LowBound\n";
-                // std::cout << "LowBound:" << roads[current_road_idx].LowBound() << std::endl;
                 coords_.y = roads[current_road_idx].LowBound();
             }
-            else if(coords_.direction == 2)
+            else if(coords_.direction == DogDirection::DOG_MOVE_LEFT)
             {
-                // std::cout << "LeftBound\n";
-                // std::cout << "LeftBound:" << roads[current_road_idx].LeftBound() << std::endl;
                 coords_.x = roads[current_road_idx].LeftBound();
             }
-            else if(coords_.direction == 3)
+            else if(coords_.direction == DogDirection::DOG_MOVE_RIGHT)
             {
-                // std::cout << "RightBound\n";
-                // std::cout << "RightBound:" << roads[current_road_idx].RightBound() << std::endl;
                 coords_.x = roads[current_road_idx].RightBound();
             }
             coords_.vx = 0.0;
             coords_.vy = 0.0;
         }
-        // std::cout << "current idx::" << current_road_idx << std:: endl;
-        // std::cout << "next coords real:" << coords_.x << " " << coords_.y << std::endl;
     }
-    // auto speed = map_ptr->GetDogSpeed();
-    // std::cout << "update one doggy\n";
-    // double dx = coords_.vx * (tick_ms)/1000.0;
-    // double dy = coords_.vy * (tick_ms)/1000.0;
-
-    // double next_p_x = coords_.x + dx;
-    // double next_p_y = coords_.y + dy;
-    // auto roads = map_ptr_->GetRoads();
-    // // std::cout << "cur road ptr " << (uint64_t)current_road << std::endl;
-    // std::cout << "next dx coords :" << dx << " " << dy << std::endl;
-    // std::cout << "coords :" << coords_.x << " " << coords_.y << std::endl;
-    // std::cout << "next coords :" << next_p_x << " " << next_p_y << std::endl;
-    // bool next_road_found = false;
-    // std::pair<bool,int> probe_road = {false, 0};
-    // if(roads[current_road_idx].PointIsWithinRoad(next_p_x, next_p_y))
-    // {
-    //     std::cout << "Within\n";
-    //     coords_.x = next_p_x;
-    //     coords_.y = next_p_y;
-    //     next_road_found = true;
-    // }
-    // else
-    // {
-    //     if(coords_.direction == 2 || coords_.direction == 3)
-    //     {
-    //         std::cout << "check hor roads\n";
-    //         auto hor_roads = map_ptr_->GetHorRoads();
-    //         // std::cout << " num ::" << hor_roads.size() << std::endl;
-    //         for(auto it = hor_roads.begin(); it < hor_roads.end(); it++)
-    //         {
-    //             if(*it == current_road_idx)
-    //                 continue;
-    //             if(roads[*it].PointIsWithinRoad(next_p_x, next_p_y))
-    //             {
-    //                 coords_.x = next_p_x;
-    //                 coords_.y = next_p_y;
-    //                 current_road_idx = *it;
-    //                 next_road_found = true;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     else if(coords_.direction == 0 || coords_.direction == 1)
-    //     {
-    //         std::cout << "check ver roads\n";
-    //         auto ver_roads = map_ptr_->GetVerRoads();
-    //         // std::cout << " num ::" << ver_roads.size() << std::endl;
-    //         for(auto it = ver_roads.begin(); it < ver_roads.end(); it++)
-    //         {
-    //             if(*it == current_road_idx)
-    //                 continue;
-    //             if(roads[*it].PointIsWithinRoad(next_p_x, next_p_y))
-    //             {
-    //                 coords_.x = next_p_x;
-    //                 coords_.y = next_p_y;
-    //                 current_road_idx = *it;
-    //                 next_road_found = true;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
-    // if(!next_road_found)
-    // {
-    //     // probe road logic
-
-    //     // move to bounds
-    //     // check next
-    //     // 
-    //     // std::cout << "road not found\n";
-    //     if(coords_.direction == 0)
-    //     {
-    //         std::cout << "UpBound:" << roads[current_road_idx].UpBound() << std::endl;
-    //         coords_.y = roads[current_road_idx].UpBound();
-    //     }
-    //     else if(coords_.direction == 1)
-    //     {
-    //         // std::cout << "LowBound\n";
-    //         std::cout << "LowBound:" << roads[current_road_idx].LowBound() << std::endl;
-    //         coords_.y = roads[current_road_idx].LowBound();
-    //     }
-    //     else if(coords_.direction == 2)
-    //     {
-    //         // std::cout << "LeftBound\n";
-    //         std::cout << "LeftBound:" << roads[current_road_idx].LeftBound() << std::endl;
-    //         coords_.x = roads[current_road_idx].LeftBound();
-    //     }
-    //     else if(coords_.direction == 3)
-    //     {
-    //         // std::cout << "RightBound\n";
-    //         std::cout << "RightBound:" << roads[current_road_idx].RightBound() << std::endl;
-    //         coords_.x = roads[current_road_idx].RightBound();
-    //     }
-    //     coords_.vx = 0.0;
-    //     coords_.vy = 0.0;
-    // }
-    // // std::cout << "current idx::" << current_road_idx << std:: endl;
-    // std::cout << "next coords real:" << coords_.x << " " << coords_.y << std::endl;
 }
 
 std::pair<std::string, Player*> Players::AddPlayer(GameSession* session ,Dog* dog_ptr)
@@ -396,7 +259,6 @@ std::pair<std::string, Player*> Players::AddPlayer(GameSession* session ,Dog* do
     std::string token = generator.generate_token();
 
     const size_t index = players_.size();
-    // std::cout << "index: " << index << std:: endl;
 
     Player* player = new Player(session, dog_ptr);
 
@@ -404,18 +266,12 @@ std::pair<std::string, Player*> Players::AddPlayer(GameSession* session ,Dog* do
 
     try {
         auto it = players_map.emplace(std::move(token), player);
-        // Проверка на добавление в мапу, обработки нет поэтому пока отключена.
-        // if(it.second == true)
-        //     std::cout << "OK\n";
         return *it.first;
     } catch (...) {
-        // Удаляем офис из вектора, если не удалось вставить в unordered_map
+        // Удаляем игрока из вектора, если не удалось вставить в вектор
         players_.pop_back();
         throw;
-    }
-    // }
-    
-    
+    }    
 
     return {0,0};
 

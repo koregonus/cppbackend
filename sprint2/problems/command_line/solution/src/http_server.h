@@ -12,16 +12,6 @@
 
 #include <variant>
 
-
-// #include <boost/log/core.hpp>
-// #include <boost/log/trivial.hpp>
-// #include <boost/log/expressions.hpp>
-// #include <boost/log/utility/setup/file.hpp>
-// #include <boost/log/utility/setup/common_attributes.hpp>
-// #include <boost/log/utility/manipulators/add_value.hpp>
-// #include <boost/date_time.hpp>
-// #include <boost/log/utility/setup/console.hpp>
-
 #include "request_handler.h"
 
 namespace http_server {
@@ -34,11 +24,6 @@ namespace http = beast::http;
 using namespace std::literals;
 using namespace std::chrono;
 namespace sys = boost::system;
-// namespace logging = boost::log;
-// namespace sinks = boost::log::sinks;
-// namespace keywords = boost::log::keywords;
-// namespace expr = boost::log::expressions;
-// namespace attrs = boost::log::attributes;
 
 
 void ReportError(beast::error_code ec, std::string_view what);
@@ -69,7 +54,7 @@ protected:
                           });
     }
 
-    ~SessionBase() = default;
+    virtual ~SessionBase() = default;
 private:
     void Read();
 

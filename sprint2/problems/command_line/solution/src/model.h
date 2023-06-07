@@ -28,6 +28,20 @@ const std::map<std::string, int> dog_direction_map {{"NORTH", 0},
                                                    {"EAST", 3}
                                                    };
 
+// Вспомогательная структура описания направления движения псов
+struct DogDirection {
+    DogDirection() = delete;
+    constexpr static int DOG_MOVE_UP = 0;
+    constexpr static int DOG_MOVE_DOWN = 1;
+    constexpr static int DOG_MOVE_LEFT = 2;
+    constexpr static int DOG_MOVE_RIGHT = 3;
+    constexpr static int DOG_MOVE_STOP = 4;
+};
+
+
+constexpr static double DELTA_ROAD_SIZE_PARAMETER = 4E-1;
+constexpr static double LAG_STEP = 100.0; 
+
 struct Point {
     Coord x, y;
 };
@@ -96,20 +110,20 @@ public:
     }
 
     double LeftBound() const noexcept {
-        return (((double)(start_.x <= end_.x)?start_.x:end_.x) - 0.4);
+        return (((double)(start_.x <= end_.x)?start_.x:end_.x) - DELTA_ROAD_SIZE_PARAMETER);
     }
 
     double RightBound() const noexcept{
-        return (((double)(start_.x <= end_.x)?end_.x:start_.x) + 0.4);
+        return (((double)(start_.x <= end_.x)?end_.x:start_.x) + DELTA_ROAD_SIZE_PARAMETER);
     }
 
     double UpBound() const noexcept{
-        return (((double)(start_.y <= end_.y)?start_.y:end_.y) - 0.4);
+        return (((double)(start_.y <= end_.y)?start_.y:end_.y) - DELTA_ROAD_SIZE_PARAMETER);
         
     }
 
     double LowBound() const noexcept{
-        return (((double)(start_.y <= end_.y)?end_.y:start_.y) + 0.4);
+        return (((double)(start_.y <= end_.y)?end_.y:start_.y) + DELTA_ROAD_SIZE_PARAMETER);
     }
 
     bool PointIsWithinRoad(double x, double y) const;
@@ -205,16 +219,7 @@ public:
         return vertical_roads_idxs;
     }
 
-    // Road* RoadPtrByIdx(int idx) const noexcept
-    // {
-    //     Road* ret = nullptr;
-    //     if(idx >= 0 && idx < roads_.size())
-    //         ret = (&roads_[idx]);
-    //     return ret;
-    // }
-
     void AddRoad(const Road& road);
-
 
     void AddBuilding(const Building& building) {
         buildings_.emplace_back(building);
@@ -254,7 +259,6 @@ namespace detail {
 struct TokenTag {};
 }  // namespace detail
 
-// using Token = util::Tagged<std::string, detail::TokenTag>;
 
 class PlayerTokens {
 public:

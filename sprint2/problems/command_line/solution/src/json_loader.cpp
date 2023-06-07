@@ -38,9 +38,9 @@ namespace json_loader {
                 if(road.if_contains("x1"))
                 {   
                     // horizontal
-                    int x0 = (int)road.at("x0").get_int64();
-                    int y0 = (int)road.at("y0").get_int64();
-                    int x1 = (int)road.at("x1").get_int64();
+                    int x0 = static_cast<int>(road.at("x0").get_int64());
+                    int y0 = static_cast<int>(road.at("y0").get_int64());
+                    int x1 = static_cast<int>(road.at("x1").get_int64());
                     model::Point start_point = {x0, y0};
                     auto newroad = model::Road(model::Road::HORIZONTAL, start_point, x1);
                     local_map.AddRoad(newroad);
@@ -48,8 +48,8 @@ namespace json_loader {
                 else if(road.if_contains("y1"))
                 {
                     // vertical
-                    model::Point start_point = {(int)road.at("x0").get_int64(), (int)road.at("y0").get_int64()};
-                    auto newroad = model::Road(model::Road::VERTICAL, start_point, (int)road.at("y1").get_int64());
+                    model::Point start_point = {static_cast<int>(road.at("x0").get_int64()), static_cast<int>(road.at("y0").get_int64())};
+                    auto newroad = model::Road(model::Road::VERTICAL, start_point, static_cast<int>(road.at("y1").get_int64()));
                     local_map.AddRoad(newroad);
                 }
                 else
@@ -69,8 +69,8 @@ namespace json_loader {
                 auto build = buildings_array.at(i).as_object();
                 try
                 {
-                    model::Point start_point = {(int)build.at("x").get_int64(), (int)build.at("y").get_int64()};
-                    model::Size build_size = {(int)build.at("w").get_int64(), (int)build.at("h").get_int64()};
+                    model::Point start_point = {static_cast<int>(build.at("x").get_int64()), static_cast<int>(build.at("y").get_int64())};
+                    model::Size build_size = {static_cast<int>(build.at("w").get_int64()), static_cast<int>(build.at("h").get_int64())};
                     local_map.AddBuilding(model::Building{model::Rectangle{start_point, build_size}});
                 }
                 catch(...)
@@ -93,8 +93,8 @@ namespace json_loader {
                     auto office_id = std::make_shared<std::string>(std::move(office.at("id").as_string()));
                     model::Office::Id id(*office_id);
 
-                    model::Point start_point = {(int)office.at("x").get_int64(), (int)office.at("y").get_int64()};
-                    model::Offset office_offset = {(int)office.at("offsetX").get_int64(), (int)office.at("offsetY").get_int64()};
+                    model::Point start_point = {static_cast<int>(office.at("x").get_int64()), static_cast<int>(office.at("y").get_int64())};
+                    model::Offset office_offset = {static_cast<int>(office.at("offsetX").get_int64()), static_cast<int>(office.at("offsetY").get_int64())};
                     local_map.AddOffice(model::Office{id, start_point, office_offset});
                 }
                 catch(...)
@@ -143,7 +143,6 @@ namespace json_loader {
         if(value.as_object().if_contains("defaultDogSpeed"))
         {
             defaultDogSpeed = value.at("defaultDogSpeed").as_double();
-            // std::cout << "DDOG: " << defaultDogSpeed_game << std::endl;
         }
 
         model::Game game;

@@ -3,7 +3,6 @@
 #include "tagged.h"
 
 #include <map>
-// #include <string>
 
 #include <boost/json.hpp>
 
@@ -17,8 +16,6 @@ namespace json = boost::json;
 
 namespace http_handler {
 
-    // the variant to visit
-    // using var_t = std::variant<http::string_body, http::file_body>;
 
     const std::map<std::string, std::string> static_parse_map {{".htm", "text/html"},
                                                         {".html", "text/html"},
@@ -58,9 +55,6 @@ namespace http_handler {
             ret = to_decode - 0x61U + 0xAU;
         }
 
-
-        // std::cout << ret << std::endl;
-
         return ret;
     }
 
@@ -84,7 +78,6 @@ namespace http_handler {
                 ret.push_back(str_from_target[i]);
             }
         }
-        // std::cout << ret << std::endl;
         return ret;
     }
 
@@ -105,30 +98,7 @@ namespace http_handler {
     }
 
 
-    // void Ticker::
-    // {
-    //     net::dispatch(api_strand_, handle);
-    // }
-
-
-	// // Создаёт StringResponse с заданными параметрами
-	// StringResponse MakeStringResponse(http::status status, std::string_view body, unsigned http_version,
-    //                               bool keep_alive, http::verb type, bool cache_control,
-    //                               std::string_view content_type, std::string_view allowed_method) {
-    //     StringResponse response(status, http_version);
-    //     response.set(http::field::content_type, content_type);
-    //     if(type != http::verb::head)
-    //         response.body() = body;
-    //     if(status == http::status::method_not_allowed)
-    //         response.set(http::field::allow, allowed_method);
-    //     if(cache_control)
-    //         response.set(http::field::cache_control, "no-cache");
-    //     response.content_length(body.size());
-    //     response.keep_alive(keep_alive);
-    //     return response;
-    // }
-
-// Создаёт StringResponse с заданными параметрами
+    // Создаёт StringResponse с заданными параметрами
     FileResponse MakeFileResponse(http::status status, std::string_view filepath, unsigned http_version,
                                   bool keep_alive, http::verb type,
                                   std::string_view content_type) {
@@ -143,8 +113,7 @@ namespace http_handler {
         }
         else
         {
-            // if(type != http::verb::head)
-                response.body() = std::move(file);
+            response.body() = std::move(file);
             response.prepare_payload();
         }
 
@@ -157,18 +126,14 @@ namespace http_handler {
                                   std::string_view content_type) {
         StringResponse response(status, http_version);
         response.set(http::field::content_type, content_type);
-        // if(type != http::verb::head)
-            // response.body() = body;
         if(status != http::status::ok)
             response.set(http::field::allow, "GET, HEAD"sv);
         try {
-            // std::cout << "Attempt to get size of a directory:\n";
             response.content_length(fs::file_size(std::string(filepath)));
             ;
         } catch(fs::filesystem_error& e) {
             std::cout << e.what() << '\n';
         }
-        // response.content_length(body.size());
         response.keep_alive(keep_alive);
         return response;
     }
@@ -321,22 +286,18 @@ namespace http_handler {
                     ret = file_head_response(http::status::ok, generated_path, get_content_type_by_filetype(std::move(fs::path(generated_path).extension())));
 
             }
-            else/*(mode == HandleMode::HANDLE_ERR_PAGE_NOT_FOUND)*/
+            else
             {
                 ret = text_response(http::status::not_found, R"(Page not found)"sv);
             }
         }
-        // return std::get<http::response<http::string_body>>(ret);
 
-        // auto sup_ptr = support_log.get();
         std::visit([sup_ptr = support_log.get()](auto&& args){
             sup_ptr->result = args.result();
             sup_ptr->result_int = args.result_int();
             sup_ptr->content_type = args.base().at(http::field::content_type);
         }, ret);
-        // sup_ptr->result_int = ret.result_int();
         return ret;
-        // return ret;
     }
 
     var_t RequestHandler::HandleApiRequest(StringRequest req, model::Game& game, model::Players& players, 
@@ -362,9 +323,6 @@ namespace http_handler {
         std::string decoded_req_target = decode_uri(req.target());
         std::string generated_path(stat_folder);
         generated_path.append(decoded_req_target);
-
-        // std::cout << "ENTERED GRAY ZONE\n";
-        // std::cout << decoded_req_target << std::endl;
 
         var_t ret;
 
@@ -404,10 +362,9 @@ namespace http_handler {
             {
                 try{
                 
-                std::string name = boost::json::value_to<std::string>(boost::json::parse(req.body()).at("userName"));
-                std::string mapid = boost::json::value_to<std::string>(boost::json::parse(req.body()).at("mapId"));
+                    std::string name = boost::json::value_to<std::string>(boost::json::parse(req.body()).at("userName"));
+                    std::string mapid = boost::json::value_to<std::string>(boost::json::parse(req.body()).at("mapId"));
                 
-                // try{
                     const model::Map* map_ptr = game.FindMap(util::Tagged<std::string, model::Map>(mapid));
                     if(name.length() == 0)
                     {
@@ -420,17 +377,15 @@ namespace http_handler {
                     else // вернуть токен
                     {
                         model::GameSession* session_ptr = game.FindGameSession(util::Tagged<std::string, model::Map>(mapid));
-                        // try{
+                        if(session_ptr == nullptr)
+                        {
+                            game.AddGameSession(util::Tagged<std::string, model::Map>(mapid));
+                            session_ptr = game.FindGameSession(util::Tagged<std::string, model::Map>(mapid));
                             if(session_ptr == nullptr)
                             {
-                            // std::cout << "NULL\n";
-                                game.AddGameSession(util::Tagged<std::string, model::Map>(mapid));
-                                session_ptr = game.FindGameSession(util::Tagged<std::string, model::Map>(mapid));
-                                if(session_ptr == nullptr)
-                                {
-                                    throw;
-                                }
+                                throw;
                             }
+                        }
 
                         
                         // Генерируем точку для собаки
@@ -453,17 +408,17 @@ namespace http_handler {
                             model::Point end_p = roads[road_idx].GetEnd();
                             if(roads[road_idx].IsHorizontal())
                             {
-                                x_d = (double)((start_p.x > end_p.x) ?
+                                x_d = static_cast<double>((start_p.x > end_p.x) ?
                                     (end_p.x + std::rand() % abs(start_p.x - end_p.x)):
                                     (start_p.x + std::rand() % abs(start_p.x - end_p.x)));
-                                y_d = (double)start_p.y;
+                                y_d = static_cast<double>(start_p.y);
                             }
                             else
                             {
-                                y_d = (double)((start_p.y > end_p.y) ?
+                                y_d = static_cast<double>((start_p.y > end_p.y) ?
                                     (end_p.y + std::rand() % abs(start_p.y - end_p.y)):
                                     (start_p.y + std::rand() % abs(start_p.y - end_p.y)));
-                                x_d = (double)start_p.x;
+                                x_d = static_cast<double>(start_p.x);
                             }
                         }
                         else
@@ -472,57 +427,19 @@ namespace http_handler {
                             model::Point end_p = roads[road_idx].GetEnd();
                             if(roads[road_idx].IsHorizontal())
                             {
-                                x_d = (double)((start_p.x > end_p.x) ?
+                                x_d = static_cast<double>((start_p.x > end_p.x) ?
                                     (end_p.x):
                                     (start_p.x));
-                                y_d = (double)start_p.y;
+                                y_d = static_cast<double>(start_p.y);
                             }
                             else
                             {
-                                y_d = (double)((start_p.y > end_p.y) ?
+                                y_d = static_cast<double>((start_p.y > end_p.y) ?
                                     (end_p.y):
                                     (start_p.y));
-                                x_d = (double)start_p.x;
+                                x_d = static_cast<double>(start_p.x);
                             }
                         }
-                        // ==== normal solution with random spawn ====
-                        // int road_idx = std::rand() % del;
-                        // double x_d, y_d;
-                        // model::Point start_p = roads[road_idx].GetStart();
-                        // model::Point end_p = roads[road_idx].GetEnd();
-                        // if(roads[road_idx].IsHorizontal())
-                        // {
-                        //     x_d = (double)((start_p.x > end_p.x) ?
-                        //         (end_p.x + std::rand() % abs(start_p.x - end_p.x)):
-                        //         (start_p.x + std::rand() % abs(start_p.x - end_p.x)));
-                        //     y_d = (double)start_p.y;
-                        // }
-                        // else
-                        // {
-                        //     y_d = (double)((start_p.y > end_p.y) ?
-                        //         (end_p.y + std::rand() % abs(start_p.y - end_p.y)):
-                        //         (start_p.y + std::rand() % abs(start_p.y - end_p.y)));
-                        //     x_d = (double)start_p.x;
-                        // }
-                        // === end of normal ===
-
-                        //  === left for tests / not random
-                        // if(roads[road_idx].IsHorizontal())
-                        // {
-                        //     x_d = (double)((start_p.x > end_p.x) ?
-                        //         (end_p.x):
-                        //         (start_p.x));
-                        //     y_d = (double)start_p.y;
-                        // }
-                        // else
-                        // {
-                        //     y_d = (double)((start_p.y > end_p.y) ?
-                        //         (end_p.y):
-                        //         (start_p.y));
-                        //     x_d = (double)start_p.x;
-                        // }
-                        // === not random ===
-
 
                         auto new_dog = session_ptr->AddDog(name, x_d, y_d, map_ptr, road_idx);
                         auto buf = players_.AddPlayer(session_ptr, new_dog);
@@ -534,14 +451,10 @@ namespace http_handler {
                         str = (json::serialize(obj));
                         std::string_view sv_str(str);
                         ret = json_response(http::status::ok, sv_str, true, AllowedMethods::ALLOW_POST);
-
-                    // ret = json_response(http::status::ok, R"({"authToken": "invalidArgument", "message": "Invalid name"})"sv, true);
                     }
 
                 } catch (...)
                 {
-
-
                     ret = json_response(http::status::bad_request, R"({"code": "invalidArgument", "message": "Join game request parse error"})"sv, true, AllowedMethods::ALLOW_POST);
                 } 
             }
@@ -607,27 +520,12 @@ namespace http_handler {
         std::string str;
 
         if(mode == HandleMode::HANDLE_NEED_MAP)
-            str = (json::serialize(obj));
-        
-        std::string_view sv_str(str);
-
-
-        switch(mode)
         {
-            case (HandleMode::HANDLE_ERR_MAP_NOT_FOUND):
-                // ret = json_response(http::status::not_found, R"({"code": "mapNotFound", "message": "Map not found"})"sv, true);
-                break;
-            // case (HandleMode::HANDLE_NEED_MAPS_LIST):
-                // ret = json_response(http::status::ok, sv_str);
-                // break; 
-            case (HandleMode::HANDLE_NEED_MAP):
-                ret = json_response(http::status::ok, sv_str, true, AllowedMethods::ALLOW_GET_HEAD);
-                break;
-            case (HandleMode::HANDLE_ERR_BAD_REQUEST):
-            default:
-                /*"{\ncode: badRequest,\nmessage: BadRequest\n}"sv);*/
-                break;
+            str = (json::serialize(obj));
+            std::string_view sv_str(str);
+            ret = json_response(http::status::ok, sv_str, true, AllowedMethods::ALLOW_GET_HEAD);
         }
+        
 
         std::visit([sup_ptr = support_log.get()](auto&& args){
             sup_ptr->result = args.result();
@@ -640,14 +538,14 @@ namespace http_handler {
 
     void MyFormatter(logging::record_view const& rec, logging::formatting_ostream& strm) {
     
-    strm << "{";
-    auto ts = *rec[timestamp];
-    strm << "\"timestamp\":" << "\"" << to_iso_extended_string(ts) << "\",";
-    strm << "\"data\":" << rec[additional_data] << ",";
-    // Выводим само сообщение.
-    strm << "\"message\":" << "\"" << rec[expr::smessage] << "\"";
-    strm << "}";
-} 
+        strm << "{";
+        auto ts = *rec[timestamp];
+        strm << "\"timestamp\":" << "\"" << to_iso_extended_string(ts) << "\",";
+        strm << "\"data\":" << rec[additional_data] << ",";
+        // Выводим само сообщение.
+        strm << "\"message\":" << "\"" << rec[expr::smessage] << "\"";
+        strm << "}";
+    } 
 
 
 

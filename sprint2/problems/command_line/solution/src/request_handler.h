@@ -271,7 +271,6 @@ public:
         BOOST_LOG_TRIVIAL(info) << logging::add_value(additional_data, custom_data)
                             << "response sent"sv;
     }
-    public:
 
     template <typename Body, typename Allocator, typename Send>
     void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, 
