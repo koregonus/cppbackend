@@ -1,12 +1,9 @@
 #pragma once
 
-
 #include <string>
 #include <optional>
 
-
 #include "model.h"
-// #include "request_handler.h"
 
 #include <boost/asio.hpp>
 
@@ -22,13 +19,6 @@ namespace beast = boost::beast;
 namespace http = beast::http;
 
 
-
-
-
-
-
-// MakeStringResponse(http::status::unauthorized, R"({"code": "unknownToken", "message": "Player token has not been found"})"sv,
-        						 // request.version(), request.keep_alive(), request.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
 
 namespace application {
 
@@ -48,10 +38,6 @@ std::optional<std::string> TryExtractToken(StringRequest& request);
 
 	using namespace std::literals;
 
-	// // // Запрос, тело которого представлено в виде строки
-	// using StringRequest = http::request<http::string_body>;
-	// // // Ответ, тело которого представлено в виде строки
-	// using StringResponse = http::response<http::string_body>;
 
 	class ListMapUseCase {
 		explicit ListMapUseCase(model::Game& game):game_{game} {}

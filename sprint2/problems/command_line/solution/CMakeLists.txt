@@ -35,6 +35,7 @@ add_executable(game_server
 	src/request_handler.h
 	src/application.cpp
 	src/application.h
+	src/application_support.h
 	src/http_req_resp_support.cpp
 	src/http_req_resp_support.h
 )

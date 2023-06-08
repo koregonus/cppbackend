@@ -22,6 +22,8 @@
 
 #include "http_req_resp_support.h"
 
+#include "application_support.h"
+
 namespace json = boost::json;
 
 using namespace std::literals;
@@ -37,8 +39,6 @@ namespace beast = boost::beast;
 namespace http = beast::http;
 namespace sys = boost::system;
 namespace net = boost::asio;
-// namespace logging = boost::log;
-// namespace keywords = boost::log::keywords;
 
 
 using namespace std::literals;
@@ -64,14 +64,6 @@ constexpr int API_PATH_LEN = 5;
 
 
 
-
-// Создаёт StringResponse с заданными параметрами
-// StringResponse MakeStringResponse(http::status status, std::string_view body, unsigned http_version,
-//                                   bool keep_alive, http::verb type, bool cache_control,
-//                                   std::string_view content_type = ContentType::TEXT_PLAIN,
-//                                   std::string_view allowed_methods = AllowedMethods::ALLOW_GET_HEAD);
-
-
 std::string decode_uri(std::basic_string_view<char> target_from_target);
 
 
@@ -84,58 +76,6 @@ struct SupportResponseLogger
     http::status result;
     std::string content_type;
     int result_int;
-    // boost::asio::ip::address ip_addr;
-};
-
-
-
-class Ticker : public std::enable_shared_from_this<Ticker> {
-public:
-    using Strand = net::strand<net::io_context::executor_type>;
-    using Handler = std::function<void(std::chrono::milliseconds delta)>;
-
-    Ticker(Strand strand, std::chrono::milliseconds period, bool start, Handler handler):strand_{strand}, period_{period},
-                                                                                        handler_{handler}, enabled(start){}
-
-    void Start() {
-        if(!enabled)
-            return;
-        // std::cout << "tick start\n";
-        last_tick_ = std::chrono::steady_clock::now();
-        /* Выполнить SchedulTick внутри strand_ */
-        // net::dispatch(strand_, std::move(ScheduleTick));
-        auto handle = [self = shared_from_this()](){
-            self->ScheduleTick();
-        };
-        // net::dispatch(strand_, [self = shared_from_this()](){
-        //     self->ScheduleTick();
-        //     std::cout << "sched tick\n";
-        // });
-        net::dispatch(strand_, handle);
-        // std::cout << "started\n";
-    }
-private:
-    bool enabled;
-    void ScheduleTick() {
-        /* выполнить OnTick через промежуток времени period_ */
-        timer_.expires_after(period_);
-        timer_.async_wait([self = shared_from_this()](sys::error_code ec){
-            self->OnTick(ec);
-        });
-        
-    }
-    void OnTick(sys::error_code ec) {
-        auto current_tick = std::chrono::steady_clock::now();
-        handler_(std::chrono::duration_cast<std::chrono::milliseconds>(current_tick - last_tick_));
-        last_tick_ = current_tick;
-        ScheduleTick();
-    }
-
-    Strand strand_;
-    net::steady_timer timer_{strand_};
-    std::chrono::milliseconds period_;
-    Handler handler_;
-    std::chrono::steady_clock::time_point last_tick_;
 };
 
 
@@ -155,10 +95,6 @@ public:
 
     using Strand = net::strand<net::io_context::executor_type>;
     
-    // explicit RequestHandler(model::Game& game)
-    //     : game_{game} {
-    // }
-
 
     explicit RequestHandler(model::Game& game, model::Players& players, application::ApplicationFacade& application, Strand api_strand, std::basic_string<char> path_from_arg)
         : game_{game}, players_{players}, app_{application}, api_strand_{api_strand} {
@@ -171,35 +107,23 @@ public:
     template <typename Body, typename Allocator, typename Send>
     std::shared_ptr<struct SupportResponseLogger> operator()(http::request<Body, http::basic_fields<Allocator>>&& req,
                                                             boost::asio::ip::tcp::endpoint endpoint, Send&& send) {
-        // Обработать запрос request и отправить ответ, используя send
-        // struct SupportResponseLogger resp_buffer;
 
-        // struct SupportResponseLogger support;
         std::shared_ptr<struct SupportResponseLogger> safe_support = std::make_shared<struct SupportResponseLogger>();
-        // safe_support.get()->ip_addr = addr;
         std::string decoded_req_target = decode_uri(req.target());
 
         if(!decoded_req_target.compare(0, 4, MAP_STORAGE_BASED, 0, 4))
         {
-            // std::cout << "compare!\n";
-                    // mode = HandleMode::HANDLE_ERR_BAD_REQUEST; // currently it's bad request
             auto handle = [self = shared_from_this(), send, req = std::forward<decltype(req)>(req), safe_support](){
-                // try {
-                        // Этот assert не выстрелит, так как лямбда-функция будет выполняться внутри strand
                         assert(self->api_strand_.running_in_this_thread());
                         send((self->HandleApiRequest(req, self->game_, self->players_, self->app_,self->static_dir_path, safe_support)));
-                    // } catch (...) 
-                    // {
-                        // std::cout << "err << std::endl;"
-                        // ;
-            //             send(self->ReportServerError(version, keep_alive));
-                    // }
-            };
+                    };
 
             net::dispatch(api_strand_, handle);
         }
         else
+        {
             send(std::move(HandleRequest(std::forward<decltype(req)>(req), game_, players_, app_, static_dir_path, safe_support)));
+        }
 
         return safe_support;
 
@@ -221,7 +145,6 @@ private:
     fs::path static_dir_path;
     Strand api_strand_;
 };
-
 
 class DurationMeasure {
 public:

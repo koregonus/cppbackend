@@ -173,13 +173,6 @@ template <typename RequestHandler>
 void ServeHttp(net::io_context& ioc, const tcp::endpoint& endpoint, RequestHandler&& handler) {
     // При помощи decay_t исключим ссылки из типа RequestHandler,
     // чтобы Listener хранил RequestHandler по значению
-    // logging::add_common_attributes();
-    // logging::add_console_log( 
-    //     std::clog,
-    //         // keywords::format = "{[%TimeStamp%]: %Message%}",
-    //     keywords::format = &(http_handler::MyFormatter),
-    //     keywords::auto_flush = true
-    // ); 
     using MyListener = Listener<std::decay_t<RequestHandler>>;
 
     std::make_shared<MyListener>(ioc, endpoint, std::forward<RequestHandler>(handler))->Run();

@@ -17,6 +17,8 @@
 
 #include <iostream>
 
+#include <optional>
+
 namespace model {
 
 using Dimension = int;
@@ -342,7 +344,7 @@ public:
         return map_ptr_->GetId();
     }
 
-    const std::vector<Dog*>& GetDogs() const noexcept {
+    const std::vector<std::shared_ptr<Dog>>& GetDogs() const noexcept {
         return dogs_;
     }
 
@@ -351,12 +353,12 @@ public:
         return map_ptr_;
     }
 
-    Dog* AddDog(std::string name, double x, double y, const Map* road_ptr, int road_idx);
+    std::shared_ptr<Dog> AddDog(std::string name, double x, double y, const Map* road_ptr, int road_idx);
 
     void UpdateDogs(double tick_ms);
 
 private:
-    std::vector<Dog*> dogs_;
+    std::vector<std::shared_ptr<Dog>> dogs_;
     const Map* map_ptr_;
 };
 
@@ -364,7 +366,7 @@ class Player {
 public:
     using Id = util::Tagged<int, Dog>;
 
-    explicit Player(GameSession* session, Dog* player_dog): session_(session), dog_(player_dog)
+    explicit Player(GameSession* session, std::shared_ptr<Dog> player_dog): session_(session), dog_(player_dog)
     {}
 
     std::string& get_player_name();
@@ -378,26 +380,26 @@ public:
         return ret;
     }
 
-    Dog* GetDog(){
-        Dog* doggy = dog_;
+    std::shared_ptr<Dog> GetDog(){
+        std::shared_ptr<Dog> doggy = dog_;
         return doggy;
     }
 
 private:
 GameSession* session_;
-Dog* dog_;
+std::shared_ptr<Dog> dog_;
 
 };
 
 class Players
 {
 public:
-    std::pair<std::string, Player*> AddPlayer(GameSession* session ,Dog* dog_ptr);
-    Player* FindByDogIdAndMapId(std::string dog_id, std::string map_id);
-    Player* FindByToken(std::string token);
+    std::pair<std::string, std::shared_ptr<Player>> AddPlayer(GameSession* session ,std::shared_ptr<Dog> dog_ptr);
+    std::shared_ptr<Player> FindByDogIdAndMapId(std::string dog_id, std::string map_id);
+    std::optional<std::shared_ptr<Player>> FindByToken(std::string token);
 private:
-    std::vector<Player*> players_;
-    std::unordered_map<std::string, Player*> players_map;
+    std::vector<std::shared_ptr<Player>> players_;
+    std::unordered_map<std::string, std::shared_ptr<Player>> players_map;
 
 
 };

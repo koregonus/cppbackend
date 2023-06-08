@@ -6,10 +6,9 @@
 
 #include <stdexcept>
 
+#include "model.h"
+
 namespace json = boost::json;
-
-
-
 
 
 namespace application {
@@ -30,15 +29,11 @@ std::optional<std::string> TryExtractToken(StringRequest& request)
 }
 
 
-
 bool TryExtractNotMatchContentType(StringRequest& request)
 {
 	bool ret = true;
   	try{
        	std::string_view local_buf = request.base().at(http::field::content_type);
-       	// std::string received_content_type(local_buf.substr(7));
-       	// if(received_token.size() < 32)
-       	// 	throw  std::length_error("token length");
        	if(local_buf == "application/json")
        		ret = false;
 
@@ -53,15 +48,15 @@ bool TryExtractNotMatchContentType(StringRequest& request)
 static std::string consider_dog_direction(int dir)
 {
 	std::string ret;
-	if(dir == 0)
+	if(dir == model::DogDirection::DOG_MOVE_UP)
 		ret.append("U");
-	else if(dir == 1)
+	else if(dir == model::DogDirection::DOG_MOVE_DOWN)
 		ret.append("D");
-	else if (dir == 2)
+	else if (dir == model::DogDirection::DOG_MOVE_LEFT)
 		ret.append("L");
-	else if (dir == 3)
+	else if (dir == model::DogDirection::DOG_MOVE_RIGHT)
 		ret.append("R");
-	else if(dir == 4)
+	else if(dir == model::DogDirection::DOG_MOVE_STOP)
 		ret = {""};
 	return ret;
 }
@@ -98,15 +93,15 @@ StringResponse ApplicationFacade::PlayersList(StringRequest& req)
 		StringResponse ret;
 
 		json::object obj;
-		model::Player* buffered_player = players->FindByToken(token);
-    	if(buffered_player == nullptr)
+		std::optional<std::shared_ptr<model::Player>> buffered_player = players->FindByToken(token);
+    	if(buffered_player == std::nullopt)
     	{
 			ret = MakeStringResponse(http::status::unauthorized, R"({"code": "unknownToken", "message": "Player token has not been found"})"sv,
 								 req.version(), req.keep_alive(), req.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
 		}
     	else
     	{
-    		model::GameSession* session_ptr = buffered_player->GetSession();
+    		model::GameSession* session_ptr = (*buffered_player)->GetSession();
     		auto dogs = session_ptr->GetDogs();
     		for(int i = 0; i < dogs.size(); i++)
     		{   
@@ -130,8 +125,8 @@ StringResponse ApplicationFacade::PlayersState(StringRequest& req)
     	
     	StringResponse ret;
         /* Выполняем действие B, используя токен, и возвращаем ответ */
-        model::Player* buffered_player = players->FindByToken(token);
-		if(buffered_player == nullptr)
+        std::optional<std::shared_ptr<model::Player>> buffered_player = players->FindByToken(token);
+    	if(buffered_player == std::nullopt)
     	{
 			ret = MakeStringResponse(http::status::unauthorized, R"({"code": "unknownToken", "message": "Player token has not been found"})"sv,
 								 req.version(), req.keep_alive(), req.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
@@ -139,7 +134,7 @@ StringResponse ApplicationFacade::PlayersState(StringRequest& req)
     	else
     	{
     		json::object obj;
-    		model::GameSession* session_ptr = buffered_player->GetSession();
+    		model::GameSession* session_ptr = (*buffered_player)->GetSession();
     		auto dogs = session_ptr->GetDogs();
 
     		for(int i = 0; i < dogs.size(); i++)
@@ -178,13 +173,13 @@ StringResponse ApplicationFacade::SetPlayerAction(StringRequest& req) {
     return ExecuteAuthorized(req, [&req, players = &players_](const std::string& token){
     		StringResponse ret;
     		bool normal_mode = true;
-    		model::Player* buffered_player = players->FindByToken(token);
+    		std::optional<std::shared_ptr<model::Player>> buffered_player = players->FindByToken(token);
     		if(TryExtractNotMatchContentType(req))
     		{
     			ret = MakeStringResponse(http::status::bad_request, R"({"code": "invalidArgument", "message": "Invalid content-type"})"sv,
         						 req.version(), req.keep_alive(), req.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
     		}
-    		else if(buffered_player == nullptr)
+    		else if(buffered_player == std::nullopt)
     		{
 				ret = MakeStringResponse(http::status::unauthorized, R"({"code": "unknownToken", "message": "Player token has not been found"})"sv,
 								 req.version(), req.keep_alive(), req.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
@@ -194,41 +189,40 @@ StringResponse ApplicationFacade::SetPlayerAction(StringRequest& req) {
 				try{	
     				std::string move = boost::json::value_to<std::string>(boost::json::parse(req.body()).at("move"));
 					std::pair<int,int> dog_speed_basis;
-					int dir = 0;
+					int dir = model::DogDirection::DOG_MOVE_UP;
 					if(move == "L")
 					{
-						dir = 2;
+						dir = model::DogDirection::DOG_MOVE_LEFT;
 						dog_speed_basis = {-1,0};
 					}
 					else if(move == "R")
 					{
-						dir = 3;
+						dir = model::DogDirection::DOG_MOVE_RIGHT;
 						dog_speed_basis = {1,0};
 					}
 					else if(move == "U")
 					{
-						dir = 0;
+						dir = model::DogDirection::DOG_MOVE_UP;
 						dog_speed_basis = {0,-1};
 					}
 					else if(move == "D")
 					{
-						dir = 1;
+						dir = model::DogDirection::DOG_MOVE_DOWN;
 						dog_speed_basis = {0,1};
 					}
 					else if(move == "")
 					{
-						dir = 4;
+						dir = model::DogDirection::DOG_MOVE_STOP;
 						dog_speed_basis = {0,0};
-						// std::cout << "move nothing\n";
 					}
 					else
 						normal_mode = false;
 
 					if(normal_mode)
 					{
-						model::GameSession* session_ptr = buffered_player->GetSession();
+						model::GameSession* session_ptr = (*buffered_player)->GetSession();
 						auto map_ptr = session_ptr->GetMap();
-						auto doggy = buffered_player->GetDog();
+						auto doggy = (*buffered_player)->GetDog();
 						double speed = map_ptr->GetDogSpeed();
 						doggy->SetDogOrientation(dog_speed_basis, speed, dir);
 						ret = MakeStringResponse(http::status::ok, R"({})"sv,
@@ -246,21 +240,17 @@ StringResponse ApplicationFacade::SetPlayerAction(StringRequest& req) {
 			ret = MakeStringResponse(http::status::unauthorized, R"({})"sv,
 								 req.version(), req.keep_alive(), req.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
 		}
-    	// } catch(...)
-    	// {
 
-    	// }
     	return ret;
     	});
 }
 
 
-void ApplicationFacade::TimerTickAuto(std::chrono::milliseconds tick_ms)
-{
-	double make_tick = (double)(tick_ms.count());
-	// std::cout << "TICK\n";
-	game_.UpdateSessionsTime(make_tick);
-}
+	void ApplicationFacade::TimerTickAuto(std::chrono::milliseconds tick_ms)
+	{
+		double make_tick = (double)(tick_ms.count());
+		game_.UpdateSessionsTime(make_tick);
+	}
 
 
 	StringResponse ApplicationFacade::TimerTick(StringRequest& req) {
@@ -273,34 +263,11 @@ void ApplicationFacade::TimerTickAuto(std::chrono::milliseconds tick_ms)
 	    			throw  std::invalid_argument("not number");
    				if(boost::json::parse(req.body()).at("timeDelta").is_double())
    					throw std::invalid_argument("not number");
-
-	    				// double tick_time_d = 0.0;
    				int tick_time = boost::json::value_to<int>(boost::json::parse(req.body()).at("timeDelta"));
-	    				
-						// int tick_time = std::stoi(tick);
-						// std::cout << "tick" << tick_time << std::endl;
 				game_.UpdateSessionsTime((double)tick_time);
-	    				// std::pair<int,int> dog_speed_basis;
-			// 			if(move == "L")
-			// 				dog_speed_basis = {-1,0};
-			// 			else if(move == "R")
-			// 				dog_speed_basis = {1,0};
-			// 			else if(move == "U")
-			// 				dog_speed_basis = {0,1};
-			// 			else if(move == "D")
-			// 				dog_speed_basis = {0,-1};
-			// 			else if(move == "")
-			// 				dog_speed_basis = {0,0};
-			// 			else
-			// 				normal_mode = false;
 
 				if(normal_mode)
 				{
-			// 				model::GameSession* session_ptr = buffered_player->GetSession();
-			// 				auto map_ptr = session_ptr->GetMap();
-			// 				auto doggy = buffered_player->GetDog();
-			// 				double speed = map_ptr->GetDogSpeed();
-			// 				doggy->SetDogOrientation(dog_speed_basis, speed);
 					ret = MakeStringResponse(http::status::ok, R"({})"sv,
 											 req.version(), req.keep_alive(), req.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
 				}
@@ -309,7 +276,6 @@ void ApplicationFacade::TimerTickAuto(std::chrono::milliseconds tick_ms)
 			{
 				normal_mode = false;
 			}
-				// }
 
 		if(!normal_mode)
 		{

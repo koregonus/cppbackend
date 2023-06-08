@@ -128,10 +128,10 @@ void Game::UpdateSessionsTime(double tick_ms)
     }
 }
 
-Dog* GameSession::AddDog(std::string name, double x, double y, const model::Map* map_ptr, int idx)
+std::shared_ptr<Dog> GameSession::AddDog(std::string name, double x, double y, const model::Map* map_ptr, int idx)
 {
     const size_t index = dogs_.size();
-    Dog* ret = new Dog(name, x, y, map_ptr, idx);
+    std::shared_ptr<Dog> ret = std::make_shared<Dog>(name, x, y, map_ptr, idx);
     try{
         dogs_.push_back(ret);
         ret = dogs_[index];
@@ -253,14 +253,14 @@ void Dog::Update(double tick_ms)
     }
 }
 
-std::pair<std::string, Player*> Players::AddPlayer(GameSession* session ,Dog* dog_ptr)
+std::pair<std::string, std::shared_ptr<Player>> Players::AddPlayer(GameSession* session ,std::shared_ptr<Dog> dog_ptr)
 {
     PlayerTokens generator;
     std::string token = generator.generate_token();
 
     const size_t index = players_.size();
 
-    Player* player = new Player(session, dog_ptr);
+    std::shared_ptr<Player> player = std::make_shared<Player>(session, dog_ptr);
 
     players_.push_back(player);
 
@@ -278,16 +278,16 @@ std::pair<std::string, Player*> Players::AddPlayer(GameSession* session ,Dog* do
 }
 
 
-Player* Players::FindByToken(std::string token)
+std::optional<std::shared_ptr<Player>> Players::FindByToken(std::string token)
 {
-    Player* ret;
+    std::optional<std::shared_ptr<Player>> ret;
     try
     {
         ret = players_map.at(token);
     }
     catch(...)
     {
-        ret = nullptr;
+        ret = std::nullopt;
     }
     return ret;
 }

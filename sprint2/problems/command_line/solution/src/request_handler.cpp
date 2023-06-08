@@ -14,6 +14,8 @@ namespace json = boost::json;
 
 #include "http_req_resp_support.h"
 
+#include "application_support.h"
+
 namespace http_handler {
 
 
