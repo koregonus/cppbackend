@@ -63,6 +63,15 @@ pipe2 = run('./FlameGraph/stackcollapse-perf.pl', subprocess.PIPE, pipe1.stdout)
 f = open("graph.svg", "w")
 pipe3 = run('./FlameGraph/flamegraph.pl', f, pipe2.stdout)
 f.close()
+time.sleep(3)
+f = open("graph.svg", "r")
+
+if 'RequestHandler' in f.read():
+    print('ReqFound')
+else:
+    for line in f.readlines():
+        print(line)
+f.close()
 
 
 print('Job done')
