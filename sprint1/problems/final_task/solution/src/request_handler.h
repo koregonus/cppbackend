@@ -33,7 +33,7 @@ StringResponse MakeStringResponse(http::status status, std::string_view body, un
 
 // StringResponse HandleRequest(StringRequest&& req);
 
-StringResponse HandleRequest(StringRequest&& req, model::Game& game);
+
 
 
 class RequestHandler {
@@ -50,6 +50,8 @@ public:
         // Обработать запрос request и отправить ответ, используя send
         send(std::move(HandleRequest(std::forward<decltype(req)>(req), game_)));
     }
+
+    StringResponse HandleRequest(StringRequest&& req, model::Game& game);
 
 private:
     model::Game& game_;

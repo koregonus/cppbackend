@@ -93,7 +93,7 @@ json::array GetOfficesFromMap(const model::Map* map_ptr)
     return offices;
 }
 
-StringResponse HandleRequest(StringRequest&& req, model::Game& game) {
+StringResponse RequestHandler::HandleRequest(StringRequest&& req, model::Game& game) {
     const auto text_response = [&req](http::status status, std::string_view text) {
         return MakeStringResponse(status, text, req.version(), req.keep_alive(), req.method());
     };
