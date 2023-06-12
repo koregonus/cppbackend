@@ -51,7 +51,7 @@ def make_shots():
 server = run(start_server())
 
 params = 'perf record -g -p ' + str(server.pid) + ' -o perf.data'
-# print(params)
+
 perf = run(params)
 make_shots()
 
@@ -64,14 +64,6 @@ f = open("graph.svg", "w")
 pipe3 = run('./FlameGraph/flamegraph.pl', f, pipe2.stdout)
 f.close()
 time.sleep(3)
-f = open("graph.svg", "r")
-
-if 'RequestHandler' in f.read():
-    print('ReqFound')
-else:
-    for line in f.readlines():
-        print(line)
-f.close()
 
 
 print('Job done')
