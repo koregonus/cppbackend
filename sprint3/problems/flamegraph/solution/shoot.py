@@ -50,7 +50,7 @@ def make_shots():
 
 server = run(start_server())
 
-params = 'perf record -g -p ' + str(server.pid
+params = 'perf record -g -p ' + str(server.pid)
 print(params)
 perf = run(params)
 make_shots()
