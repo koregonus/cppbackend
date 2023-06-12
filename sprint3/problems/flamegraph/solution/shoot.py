@@ -50,7 +50,7 @@ def make_shots():
 
 server = run(start_server())
 
-params = 'perf record -g -p ' + str(server.pid)
+params = 'perf record -g -p ' + str(server.pid) + ' -o perf.data'
 # print(params)
 perf = run(params)
 make_shots()
@@ -58,7 +58,7 @@ make_shots()
 stop(perf)
 stop(server)
 time.sleep(1)
-pipe1 = run('perf script', subprocess.PIPE)
+pipe1 = run('perf script -i perf.data', subprocess.PIPE)
 pipe2 = run('./FlameGraph/stackcollapse-perf.pl', subprocess.PIPE, pipe1.stdout)
 f = open("graph.svg", "w")
 pipe3 = run('./FlameGraph/flamegraph.pl', f, pipe2.stdout)
