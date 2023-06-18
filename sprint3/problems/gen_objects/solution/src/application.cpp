@@ -174,7 +174,7 @@ StringResponse ApplicationFacade::PlayersState(StringRequest& req)
     		}
     		json::object players_data;
     		players_data["players"] = obj;
-    		players_data["LostObjects"] = lost_objects;
+    		players_data["lostObjects"] = lost_objects;
     		// json::value players_data{{"players"s,obj}};
     		std::string str;
     		str = json::serialize(players_data);
