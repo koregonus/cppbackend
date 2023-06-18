@@ -347,7 +347,7 @@ namespace http_handler {
                     if(map_ptr == nullptr)
                     {
                         mode = HandleMode::HANDLE_ERR_MAP_NOT_FOUND;
-                        ret = json_response(http::status::not_found, R"({"code": "mapNotFound", "message": "Map not found"})"sv, false, AllowedMethods::ALLOW_GET_HEAD);
+                        ret = json_response(http::status::not_found, R"({"code": "mapNotFound", "message": "Map not found"})"sv, true, AllowedMethods::ALLOW_GET_HEAD);
                     }
                     else
                     {
