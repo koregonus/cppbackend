@@ -330,7 +330,7 @@ namespace http_handler {
 
         if(!decoded_req_target.compare(0, MAP_STORAGE_BASED.size(), MAP_STORAGE_BASED))
         {
-            if(!(req.method() == http::verb::get) || (!(req.method() == http::verb::head)))
+            if(req.method() != http::verb::get && req.method() != http::verb::head)
             {
                 ret = json_response(http::status::method_not_allowed, R"({"code": "invalidMethod", "message": "Only GET/HEAD method is expected"})"sv, true, AllowedMethods::ALLOW_GET_HEAD);
             }
