@@ -330,34 +330,41 @@ namespace http_handler {
 
         if(!decoded_req_target.compare(0, MAP_STORAGE_BASED.size(), MAP_STORAGE_BASED))
         {
-            if(MAP_STORAGE_BASED.size() == req.target().size())
+            if(!(req.method() == http::verb::get) || (!(req.method() == http::verb::head)))
             {
-                ret = AppFacade.ListMap(req);
+                ret = json_response(http::status::method_not_allowed, R"({"code": "invalidMethod", "message": "Only GET/HEAD method is expected"})"sv, true, AllowedMethods::ALLOW_GET_HEAD);
             }
             else
             {
-                std::string str_buf(decoded_req_target.substr(MAP_STORAGE_BASED.size() + 1));
-                const model::Map* map_ptr = game.FindMap(util::Tagged<std::string, model::Map>(str_buf));
-                if(map_ptr == nullptr)
+                if(MAP_STORAGE_BASED.size() == req.target().size())
                 {
-                    mode = HandleMode::HANDLE_ERR_MAP_NOT_FOUND;
-                    ret = json_response(http::status::not_found, R"({"code": "mapNotFound", "message": "Map not found"})"sv, false, AllowedMethods::ALLOW_GET_HEAD);
+                    ret = AppFacade.ListMap(req);
                 }
                 else
                 {
-                    mode = HandleMode::HANDLE_NEED_MAP;
-                    obj["id"] = *map_ptr->GetId();
-                    obj["name"] = map_ptr->GetName();
-                    obj["roads"] = GetRoadsFromMap(map_ptr);
-                    obj["buildings"] = GetBuildingsFromMap(map_ptr);
-                    obj["offices"] = GetOfficesFromMap(map_ptr);
-                    auto map_extra = AppFacade.GetExtraDataMap(str_buf);
-                    if(map_extra)
+                    std::string str_buf(decoded_req_target.substr(MAP_STORAGE_BASED.size() + 1));
+                    const model::Map* map_ptr = game.FindMap(util::Tagged<std::string, model::Map>(str_buf));
+                    if(map_ptr == nullptr)
                     {
-                        obj["lootTypes"] = *(*map_extra)->lootTypes;
+                        mode = HandleMode::HANDLE_ERR_MAP_NOT_FOUND;
+                        ret = json_response(http::status::not_found, R"({"code": "mapNotFound", "message": "Map not found"})"sv, false, AllowedMethods::ALLOW_GET_HEAD);
+                    }
+                    else
+                    {
+                        mode = HandleMode::HANDLE_NEED_MAP;
+                        obj["id"] = *map_ptr->GetId();
+                        obj["name"] = map_ptr->GetName();
+                        obj["roads"] = GetRoadsFromMap(map_ptr);
+                        obj["buildings"] = GetBuildingsFromMap(map_ptr);
+                        obj["offices"] = GetOfficesFromMap(map_ptr);
+                        auto map_extra = AppFacade.GetExtraDataMap(str_buf);
+                        if(map_extra)
+                        {
+                            obj["lootTypes"] = *(*map_extra)->lootTypes;
+                        }
                     }
                 }
-            }   
+            } 
         }
         else if(!decoded_req_target.compare(0, JOIN_GAME_BASED.size(), JOIN_GAME_BASED))
         {
