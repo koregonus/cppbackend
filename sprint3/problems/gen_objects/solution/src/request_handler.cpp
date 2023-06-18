@@ -233,7 +233,7 @@ namespace http_handler {
             return MakeStringResponse(status, text, req.version(), req.keep_alive(), req.method(), false);
         };
         const auto json_response = [&req](http::status status, std::string_view text) {
-            return MakeStringResponse(status, text, req.version(), req.keep_alive(), req.method(), false, ContentType::APP_JSON);
+            return MakeStringResponse(status, text, req.version(), req.keep_alive(), req.method(), true, ContentType::APP_JSON);
         };
         const auto file_response = [&req](http::status status, std::string_view text, std::string_view ContentType) {
             return MakeFileResponse(status, text, req.version(), req.keep_alive(), req.method(), ContentType);
