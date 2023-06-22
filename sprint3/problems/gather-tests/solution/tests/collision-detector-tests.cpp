@@ -205,7 +205,7 @@ SCENARIO("FindGatherer at work testing") {
         	collision_detector::Gatherer gath_2{.start_pos = {0,0}, .end_pos = {0,1.01}, .width = 0.6};
         	collision_detector::Item item_1{.position = {0,1.0}, .width = 0.0};
         	WHEN("gatherer moves close to target") {
-	            THEN("not gather item") {
+	            THEN("both gather item") {
 	            	test_provider.AddGatherer(gath_1);
 	            	test_provider.AddGatherer(gath_2);
 	            	test_provider.AddItem(item_1);
@@ -231,7 +231,7 @@ SCENARIO("FindGatherer at work testing") {
         	collision_detector::Item item_1{.position = {0.2,1.0}, .width = 0.0};
         	collision_detector::Item item_2{.position = {0.2,2.0}, .width = 0.0};
         	WHEN("gatherer moves close to target") {
-	            THEN("not gather item") {
+	            THEN("both gather different item") {
 	            	test_provider.AddGatherer(gath_1);
 	            	test_provider.AddGatherer(gath_2);
 	            	test_provider.AddItem(item_1);
@@ -260,7 +260,7 @@ SCENARIO("FindGatherer at work testing") {
         	collision_detector::Item item_1{.position = {10.0,22.60000000001}, .width = 0.0};
         	collision_detector::Item item_2{.position = {8.0, 2.2}, .width = 0.0};
         	WHEN("gatherer moves close to target") {
-	            THEN("not gather item") {
+	            THEN("one gather item") {
 	            	test_provider.AddGatherer(gath_1);
 	            	test_provider.AddGatherer(gath_2);
 	            	test_provider.AddItem(item_1);
@@ -274,6 +274,64 @@ SCENARIO("FindGatherer at work testing") {
 	            	auto res_2 = collision_detector::TryCollectPoint(gath_2.start_pos, gath_2.end_pos, item_2.position);
 	                check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 1, .gatherer_id = 1, .sq_distance = res_2.sq_distance, .time = res_2.proj_ratio});
 	                // check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 0, .gatherer_id = 0, .sq_distance = res_1.sq_distance, .time = res_1.proj_ratio});
+	                std::sort(check_result_event.begin(), check_result_event.end(),
+              			[](const collision_detector::GatheringEvent& e_l, const collision_detector::GatheringEvent& e_r) {
+                  			return e_l.time < e_r.time;
+              			});
+	                CHECK_THAT(test_event, IsEqualGatherEvents(std::move(check_result_event)));
+
+	            }
+	        }
+        }
+        GIVEN("two gatherers and one item") {
+        	collision_detector::Gatherer gath_1{.start_pos = {9.5,20.0}, .end_pos = {10.5, 20.0}, .width = 0.6};
+        	collision_detector::Gatherer gath_2{.start_pos = {9.0,20.1}, .end_pos = {12.4,20.1}, .width = 0.6};
+        	collision_detector::Item item_1{.position = {10.0,20.0}, .width = 0.0};
+        	// collision_detector::Item item_2{.position = {8.0, 2.2}, .width = 0.0};
+        	WHEN("gatherer moves close to target") {
+	            THEN("both gather same item") {
+	            	test_provider.AddGatherer(gath_1);
+	            	test_provider.AddGatherer(gath_2);
+	            	test_provider.AddItem(item_1);
+	            	// test_provider.AddItem(item_2);
+	                std::vector<collision_detector::GatheringEvent> test_event = collision_detector::FindGatherEvents(test_provider);
+	                // prepare to test
+	                std::vector<collision_detector::GatheringEvent> check_result_event;
+	            	auto res_1 = collision_detector::TryCollectPoint(gath_1.start_pos, gath_1.end_pos, item_1.position);
+	            	// auto res_2 = collision_detector::TryCollectPoint(gath_1.start_pos, gath_1.end_pos, item_2.position);
+	            	// auto res_3 = collision_detector::TryCollectPoint(gath_2.start_pos, gath_2.end_pos, item_1.position);
+	            	auto res_2 = collision_detector::TryCollectPoint(gath_2.start_pos, gath_2.end_pos, item_1.position);
+	                check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 0, .gatherer_id = 1, .sq_distance = res_2.sq_distance, .time = res_2.proj_ratio});
+	                check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 0, .gatherer_id = 0, .sq_distance = res_1.sq_distance, .time = res_1.proj_ratio});
+	                std::sort(check_result_event.begin(), check_result_event.end(),
+              			[](const collision_detector::GatheringEvent& e_l, const collision_detector::GatheringEvent& e_r) {
+                  			return e_l.time < e_r.time;
+              			});
+	                CHECK_THAT(test_event, IsEqualGatherEvents(std::move(check_result_event)));
+
+	            }
+	        }
+        }
+        GIVEN("two gatherers and one item, moving non orto") {
+        	collision_detector::Gatherer gath_1{.start_pos = {9.5,20.0}, .end_pos = {10.5, 20.8}, .width = 0.6};
+        	collision_detector::Gatherer gath_2{.start_pos = {9.0,20.1}, .end_pos = {12.4,21.2}, .width = 0.6};
+        	collision_detector::Item item_1{.position = {10.0,21.0}, .width = 0.0};
+        	// collision_detector::Item item_2{.position = {8.0, 2.2}, .width = 0.0};
+        	WHEN("gatherer moves close to target") {
+	            THEN("both gather same item") {
+	            	test_provider.AddGatherer(gath_1);
+	            	test_provider.AddGatherer(gath_2);
+	            	test_provider.AddItem(item_1);
+	            	// test_provider.AddItem(item_2);
+	                std::vector<collision_detector::GatheringEvent> test_event = collision_detector::FindGatherEvents(test_provider);
+	                // prepare to test
+	                std::vector<collision_detector::GatheringEvent> check_result_event;
+	            	auto res_1 = collision_detector::TryCollectPoint(gath_1.start_pos, gath_1.end_pos, item_1.position);
+	            	// auto res_2 = collision_detector::TryCollectPoint(gath_1.start_pos, gath_1.end_pos, item_2.position);
+	            	// auto res_3 = collision_detector::TryCollectPoint(gath_2.start_pos, gath_2.end_pos, item_1.position);
+	            	auto res_2 = collision_detector::TryCollectPoint(gath_2.start_pos, gath_2.end_pos, item_1.position);
+	                check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 0, .gatherer_id = 1, .sq_distance = res_2.sq_distance, .time = res_2.proj_ratio});
+	                check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 0, .gatherer_id = 0, .sq_distance = res_1.sq_distance, .time = res_1.proj_ratio});
 	                std::sort(check_result_event.begin(), check_result_event.end(),
               			[](const collision_detector::GatheringEvent& e_l, const collision_detector::GatheringEvent& e_r) {
                   			return e_l.time < e_r.time;
