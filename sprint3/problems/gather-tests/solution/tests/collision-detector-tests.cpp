@@ -98,7 +98,7 @@ struct IsPermutationMatcher : Catch::Matchers::MatcherGenericBase {
 			CHECK_THAT(range_[i].sq_distance, WithinAbs(other[i].sq_distance, 1e-10));
 			CHECK_THAT(range_[i].time, WithinAbs(other[i].time, 1e-10));
         }
-        
+
         return true;
     }
 
@@ -216,7 +216,39 @@ SCENARIO("FindGatherer at work testing") {
 	            	auto res_2 = collision_detector::TryCollectPoint(gath_2.start_pos, gath_2.end_pos, item_1.position);
 	                check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 0, .gatherer_id = 1, .sq_distance = res_2.sq_distance, .time = res_2.proj_ratio});
 	                check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 0, .gatherer_id = 0, .sq_distance = res_1.sq_distance, .time = res_1.proj_ratio});
+	                std::sort(check_result_event.begin(), check_result_event.end(),
+              			[](const collision_detector::GatheringEvent& e_l, const collision_detector::GatheringEvent& e_r) {
+                  			return e_l.time < e_r.time;
+              			});
+	                CHECK_THAT(test_event, IsEqualGatherEvents(std::move(check_result_event)));
 
+	            }
+	        }
+        }
+        GIVEN("two gatherers and two items") {
+        	collision_detector::Gatherer gath_1{.start_pos = {0,0}, .end_pos = {0,1.0}, .width = 0.6};
+        	collision_detector::Gatherer gath_2{.start_pos = {0,1.8}, .end_pos = {0,2.01}, .width = 0.6};
+        	collision_detector::Item item_1{.position = {0,1.0}, .width = 0.0};
+        	collision_detector::Item item_2{.position = {0,2.0}, .width = 0.0};
+        	WHEN("gatherer moves close to target") {
+	            THEN("not gather item") {
+	            	test_provider.AddGatherer(gath_1);
+	            	test_provider.AddGatherer(gath_2);
+	            	test_provider.AddItem(item_1);
+	            	test_provider.AddItem(item_2);
+	                std::vector<collision_detector::GatheringEvent> test_event = collision_detector::FindGatherEvents(test_provider);
+	                // prepare to test
+	                std::vector<collision_detector::GatheringEvent> check_result_event;
+	            	auto res_1 = collision_detector::TryCollectPoint(gath_1.start_pos, gath_1.end_pos, item_1.position);
+	            	// auto res_2 = collision_detector::TryCollectPoint(gath_1.start_pos, gath_1.end_pos, item_2.position);
+	            	// auto res_3 = collision_detector::TryCollectPoint(gath_2.start_pos, gath_2.end_pos, item_1.position);
+	            	auto res_2 = collision_detector::TryCollectPoint(gath_2.start_pos, gath_2.end_pos, item_2.position);
+	                check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 1, .gatherer_id = 1, .sq_distance = res_2.sq_distance, .time = res_2.proj_ratio});
+	                check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 0, .gatherer_id = 0, .sq_distance = res_1.sq_distance, .time = res_1.proj_ratio});
+	                std::sort(check_result_event.begin(), check_result_event.end(),
+              			[](const collision_detector::GatheringEvent& e_l, const collision_detector::GatheringEvent& e_r) {
+                  			return e_l.time < e_r.time;
+              			});
 	                CHECK_THAT(test_event, IsEqualGatherEvents(std::move(check_result_event)));
 
 	            }
