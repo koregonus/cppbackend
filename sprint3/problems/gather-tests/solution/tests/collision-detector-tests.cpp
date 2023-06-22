@@ -341,6 +341,26 @@ SCENARIO("FindGatherer at work testing") {
 	            }
 	        }
         }
+        GIVEN("one gatherer and one item, item width - nonzero") {
+        	collision_detector::Gatherer gath_1{.start_pos = {0,0}, .end_pos = {0,3.0}, .width = 0.6};
+        	collision_detector::Item item_1{.position = {0.8,1.2}, .width = 0.3};
+        	WHEN("gatherer moves close to target") {
+	            THEN("gather item") {
+	            	test_provider.AddGatherer(gath_1);
+	            	test_provider.AddItem(item_1);
+	                std::vector<collision_detector::GatheringEvent> test_event = collision_detector::FindGatherEvents(test_provider);
+	                std::vector<collision_detector::GatheringEvent> check_result_event;
+	                auto res_1 = collision_detector::TryCollectPoint(gath_1.start_pos, gath_1.end_pos, item_1.position);
+	                check_result_event.emplace_back(collision_detector::GatheringEvent{.item_id = 0, .gatherer_id = 0, .sq_distance = res_1.sq_distance, .time = res_1.proj_ratio});
+	                std::sort(check_result_event.begin(), check_result_event.end(),
+              			[](const collision_detector::GatheringEvent& e_l, const collision_detector::GatheringEvent& e_r) {
+                  			return e_l.time < e_r.time;
+              			});
+	                CHECK_THAT(test_event, IsEqualGatherEvents(std::move(check_result_event)));
+
+	            }
+	        }
+        }
     }
 
 // Напишите здесь тесты для функции collision_detector::FindGatherEvents
