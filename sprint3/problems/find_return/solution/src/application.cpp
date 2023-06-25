@@ -168,7 +168,7 @@ StringResponse ApplicationFacade::PlayersState(StringRequest& req)
     				local_obj["bag"] = loot_bag_items;
     			}
     			else
-    				local_obj["bag"] = "";
+    				local_obj["bag"] = json::array();
     			local_obj["score"] = dogs[i]->GetScore();
 
         		obj[std::to_string(*dogs[i]->GetId())] = local_obj;
