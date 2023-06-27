@@ -5,6 +5,13 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(additional_data, "AdditionalData", json::value)
 
 namespace http_server 
 {
+  namespace sys = boost::system;
+  namespace http = boost::beast::http;
+  namespace logging = boost::log;
+  namespace sinks = boost::log::sinks;
+  namespace keywords = boost::log::keywords;
+  namespace expr = boost::log::expressions;
+  namespace attrs = boost::log::attributes;
 	// Разместите здесь реализацию http-сервера, взяв её из задания по разработке асинхронного сервера
 
 	void ReportError(beast::error_code ec, std::string_view what) {
@@ -57,8 +64,7 @@ namespace http_server
 	}
 
   void SessionBase::Close() {
-    beast::error_code ec;
-    stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
+    stream_.socket().shutdown(tcp::socket::shutdown_send);
   }
 
 }  // namespace http_server

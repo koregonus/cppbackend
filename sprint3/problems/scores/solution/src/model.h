@@ -82,11 +82,11 @@ struct Dog_mv_param{
 
 class Road {
     struct HorizontalTag {
-        explicit HorizontalTag() = default;
+        HorizontalTag() = default;
     };
 
     struct VerticalTag {
-        explicit VerticalTag() = default;
+        VerticalTag() = default;
     };
 
 public:
@@ -403,7 +403,7 @@ public:
         return LootBag.size();
     }
 
-    int GetScore() const noexcept
+    int GetScore() const
     {
         return score;
     }
@@ -474,7 +474,7 @@ public:
         return dogs_;
     }
 
-    const Map* GetMap()
+    const Map* GetMap() const
     {
         return map_ptr_;
     }
@@ -495,7 +495,7 @@ public:
         loot_objs_.erase(loot_objs_.begin() + idx);
     }
 
-    const std::vector<std::shared_ptr<LootObj>>& GetLootObjs()
+    const std::vector<std::shared_ptr<LootObj>>& GetLootObjs() const
     {
         return loot_objs_;
     }
@@ -545,18 +545,16 @@ public:
     explicit Player(GameSession* session, std::shared_ptr<Dog> player_dog): session_(session), dog_(player_dog)
     {}
 
-    std::string& get_player_name();
-
     const Id& GetId() const noexcept {
         return dog_->GetId();
     }
 
-    GameSession* GetSession(){
+    GameSession* GetSession() const {
         GameSession* ret = session_;
         return ret;
     }
 
-    std::shared_ptr<Dog> GetDog(){
+    std::shared_ptr<Dog> GetDog() const {
         std::shared_ptr<Dog> doggy = dog_;
         return doggy;
     }
@@ -581,12 +579,6 @@ private:
 };
 
 double model_random_generator();
-// {
-//     std::random_device rd;  // Will be used to obtain a seed for the random number engine
-//     std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-//     std::uniform_real_distribution<> dis(0.0, 1.0);
-//     return dis(gen);
-// }
 
 class Game {
 public:
@@ -607,7 +599,7 @@ public:
         return nullptr;
     }
 
-    GameSession* FindGameSession(const Map::Id& id) noexcept {
+    GameSession* FindGameSession(const Map::Id& id) {
         if (auto it = game_session_id_to_index_.find(id); it != game_session_id_to_index_.end()) {
             return &sessions_.at(it->second);
         }
@@ -621,7 +613,7 @@ public:
         loot_g_ = std::make_shared<loot_gen::LootGenerator>(period, probability, model_random_generator);
     }
 
-    unsigned GetNumberOfItemsToAdd(std::chrono::milliseconds time_delta, unsigned loot_count, unsigned looter_count);
+    unsigned GetNumberOfItemsToAdd(std::chrono::milliseconds time_delta, unsigned loot_count, unsigned looter_count) const;
 
 private:
     using MapIdHasher = util::TaggedHasher<Map::Id>;

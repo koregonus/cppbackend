@@ -32,16 +32,21 @@ namespace {
 
 namespace sys = boost::system;
 namespace http = boost::beast::http;
+namespace logging = boost::log;
+namespace sinks = boost::log::sinks;
+namespace keywords = boost::log::keywords;
+namespace expr = boost::log::expressions;
+namespace attrs = boost::log::attributes;
 
 
 // Запускает функцию fn на n потоках, включая текущий
 template <typename Fn>
-void RunWorkers(unsigned num, const Fn& fn) {
-    num = std::max(1u, num);
+void RunWorkers(unsigned num_of_threads, const Fn& fn) {
+    num_of_threads = std::max(1u, num_of_threads);
     std::vector<std::jthread> workers;
-    workers.reserve(num - 1);
+    workers.reserve(num_of_threads - 1);
     // Запускаем n-1 рабочих потоков, выполняющих функцию fn
-    while (--num) {
+    while (--num_of_threads) {
         workers.emplace_back(fn);
     }
     fn();

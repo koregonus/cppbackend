@@ -24,6 +24,8 @@
 
 #include "application_support.h"
 
+
+namespace http_handler {
 namespace json = boost::json;
 
 using namespace std::literals;
@@ -34,7 +36,6 @@ namespace expr = boost::log::expressions;
 namespace attrs = boost::log::attributes;
 
 namespace fs = std::filesystem;
-namespace http_handler {
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace sys = boost::system;

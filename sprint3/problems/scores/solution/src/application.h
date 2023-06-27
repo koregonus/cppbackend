@@ -24,11 +24,11 @@ namespace json = boost::json;
 
 namespace application {
 
-std::optional<std::string> TryExtractToken(StringRequest& request);
+std::optional<std::string> TryExtractToken(const StringRequest& request);
 	
 
 	template <typename Fn>
-	StringResponse ExecuteAuthorized(StringRequest& request, Fn&& action) 
+	StringResponse ExecuteAuthorized(const StringRequest& request, Fn&& action) 
 	{
     	if (auto token = TryExtractToken(request)) {
         	return action(*token);
@@ -56,27 +56,27 @@ std::optional<std::string> TryExtractToken(StringRequest& request);
 																app_support::FrontendExtraDataMap& extra_data):game_{game}, players_{players},
 																frontend_extra_data_{extra_data}, auto_timer_mode(false), random_spawn_dogs(false) {}
 
-		StringResponse ListMap(StringRequest req);
+		StringResponse ListMap(const StringRequest req);
 
-		StringResponse PlayersList(StringRequest& req);
+		StringResponse PlayersList(const StringRequest& req);
 		
-		StringResponse PlayersState(StringRequest& req);
+		StringResponse PlayersState(const StringRequest& req);
 
-		StringResponse SetPlayerAction(StringRequest& request);
+		StringResponse SetPlayerAction(const StringRequest& request);
 
-		StringResponse TimerTick(StringRequest& request);
+		StringResponse TimerTick(const StringRequest& request);
 
 		void TimerTickAuto(std::chrono::milliseconds time_tick);
 
 		void AutoTimerModeEnable();
 
-		bool GetTimerMode();
+		bool GetTimerMode() const;
 
 		void SetRandomSpawn();
 
-		bool IsInRandomSpawnMode();
+		bool IsInRandomSpawnMode() const;
 
-		std::optional<std::shared_ptr<app_support::loottypes_for_maps>> GetExtraDataMap(std::string Id);
+		std::optional<std::shared_ptr<app_support::loottypes_for_maps>> GetExtraDataMap(std::string Id) const noexcept;
 
 	private:
 		bool auto_timer_mode;

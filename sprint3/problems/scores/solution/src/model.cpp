@@ -64,17 +64,21 @@ bool Road::PointIsWithinRoad(double x, double y) const
 void Map::AddRoad(const Road& road)
 {
     size_t idx = roads_.size();
-
     roads_.emplace_back(road);
     if(road.IsHorizontal())
+    {
         horizontal_roads_idx.push_back(idx);
+    }
     else
+    {
         vertical_roads_idxs.push_back(idx);
+    }
 }
 
 
 void Map::AddOffice(Office office) {
-    if (warehouse_id_to_index_.contains(office.GetId())) {
+    if (warehouse_id_to_index_.contains(office.GetId()))
+    {
         throw std::invalid_argument("Duplicate warehouse");
     }
 
@@ -119,7 +123,7 @@ void Game::AddGameSession(Map::Id id) {
     }
 }
 
-unsigned Game::GetNumberOfItemsToAdd(std::chrono::milliseconds time_delta, unsigned loot_count, unsigned looter_count)
+unsigned Game::GetNumberOfItemsToAdd(std::chrono::milliseconds time_delta, unsigned loot_count, unsigned looter_count) const
 {
     return loot_g_->Generate(time_delta, loot_count, looter_count);
 }
@@ -174,7 +178,9 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms)
 {
     double make_tick = (double)(tick_ms.count());
     if(sessions_.size() == 0)
+    {
         return;
+    }
     for(auto it = sessions_.begin(); it < sessions_.end(); it++)
     {
         auto dogs = it->GetDogs();
@@ -196,7 +202,9 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms)
         (*it).UpdateDogs(make_tick);
         auto finded_gather_elm = collision_detector::FindGatherEvents((*it));
         if(finded_gather_elm.size() == 0)
+        {
             continue;
+        }
         else
         {
             auto map_cap = map_ptr->GetBagCapacity();
@@ -215,7 +223,9 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms)
                     // check loot bag
                     auto dog_bag_cap = dogs[find_gat_it->gatherer_id]->GetLootBagSize();
                     if(dog_bag_cap >= map_cap)
+                    {
                         continue;
+                    }
 
                     // check if item already processed
                     bool alredyProcessed = false;
@@ -266,7 +276,9 @@ std::shared_ptr<Dog> GameSession::AddDog(std::string name, double x, double y, c
 void Dog::Update(double tick_ms)
 {
     if(coords_.direction == DogDirection::DOG_MOVE_STOP)
+    {
         return;
+    }
     int lag_count = 0;
     double tick_buff = 0.0;
     double tick_tail = 0.0;

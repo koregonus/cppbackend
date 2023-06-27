@@ -77,13 +77,7 @@ namespace app_support	{
 
 		void AddExtraData(std::string Id, std::shared_ptr<loottypes_for_maps> local_loot);
 
-		// void AddRandomLoot(std::chrono::milliseconds period, double probability)
-    	// {
-        // 	loot_g_ = std::make_shared<loot_gen::LootGenerator>(period, probability);
-    	// }
-
 	private:
 		std::map<std::string, std::shared_ptr<loottypes_for_maps>> extra_data_;
-		// std::shared_ptr<loot_gen::LootGenerator> loot_g_;
 	};
 }

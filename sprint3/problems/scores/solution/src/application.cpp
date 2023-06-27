@@ -16,7 +16,7 @@ namespace application {
 
 namespace json = boost::json;
 
-std::optional<std::string> TryExtractToken(StringRequest& request)
+std::optional<std::string> TryExtractToken(const StringRequest& request)
 {
   	try{
        	std::string_view local_bearer_buf = request.base().at(http::field::authorization);
@@ -31,7 +31,7 @@ std::optional<std::string> TryExtractToken(StringRequest& request)
 }
 
 
-bool TryExtractNotMatchContentType(StringRequest& request)
+bool TryExtractNotMatchContentType(const StringRequest& request)
 {
 	bool ret = true;
   	try{
@@ -40,10 +40,10 @@ bool TryExtractNotMatchContentType(StringRequest& request)
        		ret = false;
 
    	} catch(...)
-   	{
-       	ret = true;
-   	}
-   	return ret;
+	{
+		ret = true;
+	}
+	return ret;
 }
 
 
@@ -66,7 +66,7 @@ static std::string consider_dog_direction(int dir)
 
 
 
-StringResponse ApplicationFacade::ListMap(StringRequest req)
+StringResponse ApplicationFacade::ListMap(const StringRequest req)
 {
 	auto maps = game_.GetMaps();
 
@@ -89,7 +89,7 @@ StringResponse ApplicationFacade::ListMap(StringRequest req)
 }
 
 
-StringResponse ApplicationFacade::PlayersList(StringRequest& req)
+StringResponse ApplicationFacade::PlayersList(const StringRequest& req)
 {
 	return ExecuteAuthorized(req, [req, players = &players_](const std::string& token){
 		StringResponse ret;
@@ -121,7 +121,7 @@ StringResponse ApplicationFacade::PlayersList(StringRequest& req)
 	});
 }
 
-StringResponse ApplicationFacade::PlayersState(StringRequest& req)
+StringResponse ApplicationFacade::PlayersState(const StringRequest& req)
 {
 	return ExecuteAuthorized(req, [req, players = &players_](const std::string& token){
     	
@@ -185,12 +185,10 @@ StringResponse ApplicationFacade::PlayersState(StringRequest& req)
     			arr_pos.push_back(lost_objs[i]->y_);
     			local_obj["pos"] = arr_pos;
     			lost_objects[std::to_string(i)] = local_obj;
-    			// local_obj["type"] = lost_objs[i].type;
     		}
     		json::object players_data;
     		players_data["players"] = obj;
     		players_data["lostObjects"] = lost_objects;
-    		// json::value players_data{{"players"s,obj}};
     		std::string str;
     		str = json::serialize(players_data);
     		std::string_view sv_str(str);
@@ -202,7 +200,7 @@ StringResponse ApplicationFacade::PlayersState(StringRequest& req)
 }
 
 
-StringResponse ApplicationFacade::SetPlayerAction(StringRequest& req) {
+StringResponse ApplicationFacade::SetPlayerAction(const StringRequest& req) {
     
     return ExecuteAuthorized(req, [&req, players = &players_](const std::string& token){
     		StringResponse ret;
@@ -286,7 +284,7 @@ StringResponse ApplicationFacade::SetPlayerAction(StringRequest& req) {
 	}
 
 
-	StringResponse ApplicationFacade::TimerTick(StringRequest& req) {
+	StringResponse ApplicationFacade::TimerTick(const StringRequest& req) {
 	    StringResponse ret;
 
 	    bool normal_mode = true;
@@ -319,7 +317,7 @@ StringResponse ApplicationFacade::SetPlayerAction(StringRequest& req) {
 	    return ret;
 	}
 
-	bool ApplicationFacade::GetTimerMode()
+	bool ApplicationFacade::GetTimerMode() const
 	{
 		return auto_timer_mode;
 	}
@@ -334,13 +332,13 @@ StringResponse ApplicationFacade::SetPlayerAction(StringRequest& req) {
 		random_spawn_dogs = true;
 	}
 
-	bool ApplicationFacade::IsInRandomSpawnMode()
+	bool ApplicationFacade::IsInRandomSpawnMode() const
 	{
 		return random_spawn_dogs;
 	}
 
 
-	std::optional<std::shared_ptr<app_support::loottypes_for_maps>> ApplicationFacade::GetExtraDataMap(std::string Id)
+	std::optional<std::shared_ptr<app_support::loottypes_for_maps>> ApplicationFacade::GetExtraDataMap(std::string Id) const noexcept
 	{
 		return frontend_extra_data_.GetExtraData(std::move(Id));
 	}
