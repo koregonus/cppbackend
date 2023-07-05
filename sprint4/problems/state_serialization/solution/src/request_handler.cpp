@@ -465,6 +465,7 @@ namespace http_handler {
                         str = (json::serialize(obj));
                         std::string_view sv_str(str);
                         ret = json_response(http::status::ok, sv_str, true, AllowedMethods::ALLOW_POST);
+                        AppFacade.BackupGame();
                     }
 
                 } catch (...)

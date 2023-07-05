@@ -316,6 +316,8 @@ StringResponse ApplicationFacade::SetPlayerAction(const StringRequest& req) {
    				int tick_time = boost::json::value_to<int>(boost::json::parse(req.body()).at("timeDelta"));
 				std::chrono::milliseconds tick_ms(tick_time);
 				game_.UpdateSessionsTime(tick_ms);
+				TryBackupTimer(static_cast<int>(tick_ms.count()));
+
 
 				if(normal_mode)
 				{
