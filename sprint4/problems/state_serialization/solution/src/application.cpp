@@ -441,6 +441,10 @@ StringResponse ApplicationFacade::SetPlayerAction(const StringRequest& req) {
 	        		session_ptr->AddDog(restored_dog);
 	        		players_.AddPlayer(session_ptr, restored_dog, (*it).tokens[i]);
 	        	}
+	        	for(auto loot_it : it->session_loot)
+	        	{
+	        		session_ptr->AddLootObj(loot_it);
+	        	}
 
 	        }
 	    }

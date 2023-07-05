@@ -126,9 +126,13 @@ struct GameSessionRepr
         auto map = session.GetMap();
         map_id = (*map->GetId());
         auto loot = session.GetLootObjs();
-        for(const auto& item : loot)
+        for(int i = 0; i < loot.size(); i++)
         {
-            session_loot.push_back(model::LootObj(item->type_,item->x_,item->y_,item->width_, item->value_));
+            if(i < session.GetCountOfBases())
+            {
+                continue;
+            }
+            session_loot.push_back(model::LootObj(loot[i]->type_,loot[i]->x_,loot[i]->y_,loot[i]->width_, loot[i]->value_));
         }
 
     }

@@ -541,6 +541,16 @@ public:
             count_base_++;
     }
 
+    void AddLootObj(LootObj& loot_to_add)
+    {
+        loot_objs_.push_back(std::make_shared<LootObj>(loot_to_add));
+    }
+
+    int GetCountOfBases() const
+    {
+        return count_base_;
+    }
+
     void EraseLootObj(int idx)
     {
         loot_objs_.erase(loot_objs_.begin() + idx);
@@ -575,11 +585,6 @@ public:
                                             {dogs_[idx]->GetPrevPos().first, dogs_[idx]->GetPrevPos().second},
                                             dogs_[idx]->GetWidth()};
         return ret;
-    }
-
-    int GetCountOfBases() const
-    {
-        return count_base_;
     }
 
 private:
