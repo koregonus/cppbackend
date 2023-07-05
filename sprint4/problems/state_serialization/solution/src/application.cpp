@@ -401,7 +401,14 @@ StringResponse ApplicationFacade::SetPlayerAction(const StringRequest& req) {
 	    }
 
 	    ar << ser_prepared;
-	    std::filesystem::rename(temp_backup_path, backup_path);
+	    try
+	    {
+	    	std::filesystem::rename(temp_backup_path, backup_path);
+	    }
+	    catch(...)
+	    {
+	    	return;
+	    }
 	}
 
 	void ApplicationFacade::RestoreGame()
