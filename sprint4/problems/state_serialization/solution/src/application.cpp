@@ -370,7 +370,8 @@ StringResponse ApplicationFacade::SetPlayerAction(const StringRequest& req) {
 
 	void ApplicationFacade::BackupGame()
 	{
-	    std::string temp_backup_path(".backup");
+	    std::string temp_backup_path(backup_path);
+	    temp_backup_path.append("_backup");
 	    std::ofstream out_arch{temp_backup_path, std::ios_base::binary};
 	    if(!out_arch.good())
 	    	return;
