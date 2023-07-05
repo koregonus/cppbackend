@@ -593,7 +593,7 @@ class Player {
 public:
     using Id = util::Tagged<int, Dog>;
 
-    explicit Player(GameSession* session, std::shared_ptr<Dog> player_dog, std::string& token_gen): session_(session), dog_(player_dog)
+    explicit Player(std::shared_ptr<GameSession> session, std::shared_ptr<Dog> player_dog, std::string& token_gen): session_(session), dog_(player_dog)
     {
         token = token_gen;
     }
@@ -602,9 +602,9 @@ public:
         return dog_->GetId();
     }
 
-    GameSession* GetSession() const {
-        GameSession* ret = session_;
-        return ret;
+    std::shared_ptr<GameSession> GetSession() const {
+        // GameSession* ret = session_;
+        return session_;
     }
 
     std::shared_ptr<Dog> GetDog() const {
@@ -619,7 +619,7 @@ public:
 
 private:
 std::string token;
-GameSession* session_;
+std::shared_ptr<GameSession> session_;
 std::shared_ptr<Dog> dog_;
 
 };
@@ -627,8 +627,8 @@ std::shared_ptr<Dog> dog_;
 class Players
 {
 public:
-    std::pair<std::string, std::shared_ptr<Player>> AddPlayer(GameSession* session ,std::shared_ptr<Dog> dog_ptr);
-    std::pair<std::string, std::shared_ptr<Player>> AddPlayer(GameSession* session ,std::shared_ptr<Dog> dog_ptr, std::string token);
+    std::pair<std::string, std::shared_ptr<Player>> AddPlayer(std::shared_ptr<GameSession> session ,std::shared_ptr<Dog> dog_ptr);
+    std::pair<std::string, std::shared_ptr<Player>> AddPlayer(std::shared_ptr<GameSession> session ,std::shared_ptr<Dog> dog_ptr, std::string token);
     std::shared_ptr<Player> FindByDogIdAndMapId(std::string dog_id, std::string map_id);
     std::optional<std::shared_ptr<Player>> FindByDogId(model::Dog::Id dog_id);
     std::optional<std::shared_ptr<Player>> FindByToken(std::string token);
@@ -664,14 +664,14 @@ public:
         return nullptr;
     }
 
-    GameSession* FindGameSession(const Map::Id& id) {
+    std::shared_ptr<GameSession> FindGameSession(const Map::Id& id) {
         if (auto it = game_session_id_to_index_.find(id); it != game_session_id_to_index_.end()) {
-            return &sessions_.at(it->second);
+            return sessions_.at(it->second);
         }
         return nullptr;
     }
 
-    const std::vector<GameSession>& GetSessions() const
+    const std::vector<std::shared_ptr<GameSession>>& GetSessions() const
     {
         return sessions_;
     }
@@ -695,7 +695,7 @@ private:
 
     using GameSessionIdToIndex = std::unordered_map<Map::Id, size_t, MapIdHasher>;
     GameSessionIdToIndex game_session_id_to_index_;
-    std::vector<GameSession> sessions_;
+    std::vector<std::shared_ptr<GameSession>> sessions_;
     std::shared_ptr<loot_gen::LootGenerator> loot_g_;
 };
 

@@ -390,7 +390,7 @@ namespace http_handler {
                     }
                     else // вернуть токен
                     {
-                        model::GameSession* session_ptr = game.FindGameSession(util::Tagged<std::string, model::Map>(mapid));
+                        auto session_ptr = game.FindGameSession(util::Tagged<std::string, model::Map>(mapid));
                         if(session_ptr == nullptr)
                         {
                             game.AddGameSession(util::Tagged<std::string, model::Map>(mapid));

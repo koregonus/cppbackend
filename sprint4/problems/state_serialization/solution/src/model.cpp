@@ -114,7 +114,7 @@ void Game::AddGameSession(Map::Id id) {
     } else {
         try{
             const model::Map* map_ptr = FindMap(util::Tagged<std::string, model::Map>(id));
-            sessions_.emplace_back(GameSession{map_ptr});
+            sessions_.push_back(std::make_shared<GameSession>(map_ptr));
         }
         catch (...)
         {
@@ -182,24 +182,24 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms)
     }
     for(auto it = sessions_.begin(); it < sessions_.end(); it++)
     {
-        auto dogs = it->GetDogs();
-        auto loot_objs = it->GetLootObjs();
-        int base_count = it->GetCountOfBases();
+        auto dogs = (*it)->GetDogs();
+        auto loot_objs = (*it)->GetLootObjs();
+        int base_count = (*it)->GetCountOfBases();
         unsigned count = loot_g_->Generate(tick_ms, loot_objs.size() - base_count, dogs.size());
-        auto map_ptr = it->GetMap();
+        auto map_ptr = (*it)->GetMap();
         auto rand_types = map_ptr->GetLootObjsCount();
         for(int i = 0; i < count; i++)
         {
             std::chrono::system_clock::time_point cur_ts = std::chrono::system_clock::now();
             std::chrono::system_clock::time_point time_point_nano = std::chrono::time_point_cast<std::chrono::nanoseconds>(cur_ts);
             int seed = time_point_nano.time_since_epoch().count();
-            auto coords_for_loot = it->GetRandomPointOnMap();
+            auto coords_for_loot = (*it)->GetRandomPointOnMap();
             std::srand(seed);
             auto type = rand()%rand_types;
-            it->AddLootObj(type, coords_for_loot.first, coords_for_loot.second, ITEM_WIDTH, map_ptr->GetLootValue(type), false);
+            (*it)->AddLootObj(type, coords_for_loot.first, coords_for_loot.second, ITEM_WIDTH, map_ptr->GetLootValue(type), false);
         }
-        (*it).UpdateDogs(make_tick);
-        auto finded_gather_elm = collision_detector::FindGatherEvents((*it));
+        (*it)->UpdateDogs(make_tick);
+        auto finded_gather_elm = collision_detector::FindGatherEvents(*(*it));
         if(finded_gather_elm.size() == 0)
         {
             continue;
@@ -247,7 +247,7 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms)
                         // append to processed list
                         processed_items.push_back(find_gat_it->item_id);
                         // erase processed element
-                        it->EraseLootObj(find_gat_it->item_id);
+                        (*it)->EraseLootObj(find_gat_it->item_id);
                     }
                 }
             }
@@ -397,7 +397,7 @@ void Dog::Update(double tick_ms)
     }
 }
 
-std::pair<std::string, std::shared_ptr<Player>> Players::AddPlayer(GameSession* session ,std::shared_ptr<Dog> dog_ptr)
+std::pair<std::string, std::shared_ptr<Player>> Players::AddPlayer(std::shared_ptr<GameSession> session ,std::shared_ptr<Dog> dog_ptr)
 {
     PlayerTokens generator;
     std::string token = generator.generate_token();
@@ -421,7 +421,7 @@ std::pair<std::string, std::shared_ptr<Player>> Players::AddPlayer(GameSession* 
 
 }
 
-std::pair<std::string, std::shared_ptr<Player>> Players::AddPlayer(GameSession* session ,std::shared_ptr<Dog> dog_ptr, std::string token_restore)
+std::pair<std::string, std::shared_ptr<Player>> Players::AddPlayer(std::shared_ptr<GameSession> session ,std::shared_ptr<Dog> dog_ptr, std::string token_restore)
 {
     const size_t index = players_.size();
 

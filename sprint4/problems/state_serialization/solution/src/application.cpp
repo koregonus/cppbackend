@@ -109,7 +109,7 @@ StringResponse ApplicationFacade::PlayersList(const StringRequest& req)
 		}
     	else
     	{
-    		model::GameSession* session_ptr = (*buffered_player)->GetSession();
+    		auto session_ptr = (*buffered_player)->GetSession();
     		auto dogs = session_ptr->GetDogs();
     		for(int i = 0; i < dogs.size(); i++)
     		{   
@@ -143,7 +143,7 @@ StringResponse ApplicationFacade::PlayersState(const StringRequest& req)
     	{
     		json::object obj;
     		json::object lost_objects;
-    		model::GameSession* session_ptr = (*buffered_player)->GetSession();
+    		auto session_ptr = (*buffered_player)->GetSession();
     		auto dogs = session_ptr->GetDogs();
     		auto lost_objs = session_ptr->GetLootObjs();
 
@@ -258,7 +258,7 @@ StringResponse ApplicationFacade::SetPlayerAction(const StringRequest& req) {
 
 					if(normal_mode)
 					{
-						model::GameSession* session_ptr = (*buffered_player)->GetSession();
+						auto session_ptr = (*buffered_player)->GetSession();
 						auto map_ptr = session_ptr->GetMap();
 						auto doggy = (*buffered_player)->GetDog();
 						double speed = map_ptr->GetDogSpeed();
@@ -386,9 +386,9 @@ StringResponse ApplicationFacade::SetPlayerAction(const StringRequest& req) {
 	    }
 	    for(auto it = local_sessions.begin(); it < local_sessions.end(); it++)
 	    {
-	    	serialization::GameSessionRepr sessionRepr(*it);
+	    	serialization::GameSessionRepr sessionRepr(*(*it));
 
-	        auto dogs = it->GetDogs();
+	        auto dogs = (*it)->GetDogs();
 	        for(int i = 0; i < dogs.size(); i++)
 	        {
 	            serialization::DogRepr dogSerBuf(*dogs[i]);
