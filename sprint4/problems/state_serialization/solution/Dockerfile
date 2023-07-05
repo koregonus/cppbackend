@@ -35,5 +35,5 @@ COPY --from=build /app/build/bin/game_server /app/
 COPY ./data /app/data
 COPY ./static /app/static
 
-# Запускаем игровой сервер
-ENTRYPOINT ["/app/game_server", "-c", "/app/data/config.json", "-w", "/app/static", "--state-file", "state.backup", "--save-state-period", "5000"]
+# НЕ запускаем игровой сервер
+
