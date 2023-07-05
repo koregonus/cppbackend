@@ -147,6 +147,7 @@ int main(int argc, const char* argv[]) {
                 {
                     AppFacade.InitBackupParams((*args).backup_file,std::stoi((*args).backup_period));
                     AppFacade.RestoreGame();
+                    AppFacade.BackupGame();
                 }
 
                 // 2. Инициализируем io_context

@@ -290,7 +290,7 @@ StringResponse ApplicationFacade::SetPlayerAction(const StringRequest& req) {
 		prev_backup_period += tick_ms;
 		if(prev_backup_period >= backup_period)
 		{
-			prev_backup_period = 0;
+			prev_backup_period = prev_backup_period - backup_period;
 			BackupGame();
 		}
 	}
@@ -383,25 +383,24 @@ StringResponse ApplicationFacade::SetPlayerAction(const StringRequest& req) {
 	    serialization::GlobalArchieve ser_prepared;
 
 
-	    if(local_sessions.size() == 0)
+	    if(local_sessions.size() > 0)
 	    {
-	        return;
-	    }
-	    for(auto it = local_sessions.begin(); it < local_sessions.end(); it++)
-	    {
-	    	serialization::GameSessionRepr sessionRepr(*(*it));
+		    for(auto it = local_sessions.begin(); it < local_sessions.end(); it++)
+		    {
+		    	serialization::GameSessionRepr sessionRepr(*(*it));
 
-	        auto dogs = (*it)->GetDogs();
-	        for(int i = 0; i < dogs.size(); i++)
-	        {
-	            serialization::DogRepr dogSerBuf(*dogs[i]);
-	            auto dog_id = dogs[i]->GetId();
-	            auto token = (*players_.FindByDogId(dog_id))->GetToken();
-	            sessionRepr.dog_reprs.push_back(dogSerBuf);
-	            sessionRepr.tokens.push_back(token);
-	        }
-	        ser_prepared.game_session_reprs.push_back(sessionRepr);
-	    }
+		        auto dogs = (*it)->GetDogs();
+		        for(int i = 0; i < dogs.size(); i++)
+		        {
+		            serialization::DogRepr dogSerBuf(*dogs[i]);
+		            auto dog_id = dogs[i]->GetId();
+		            auto token = (*players_.FindByDogId(dog_id))->GetToken();
+		            sessionRepr.dog_reprs.push_back(dogSerBuf);
+		            sessionRepr.tokens.push_back(token);
+		        }
+		        ser_prepared.game_session_reprs.push_back(sessionRepr);
+		    }
+		}
 
 	    ar << ser_prepared;
 	    try
