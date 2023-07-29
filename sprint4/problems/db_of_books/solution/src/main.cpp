@@ -60,11 +60,6 @@ int main(int argc, const char* argv[]) {
                     isbn = boost::json::value_to<std::string>(payload.at("ISBN"));
                 }
 
-                std::cout << title << std::endl;
-                std::cout << author << std::endl;
-                std::cout << year << std::endl;
-                std::cout << isbn << std::endl;
-
                 bool not_okich = false;
 
                 pqxx::work add_trans(conn);
