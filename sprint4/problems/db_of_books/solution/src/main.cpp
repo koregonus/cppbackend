@@ -34,8 +34,8 @@ int main(int argc, const char* argv[]) {
         conn.prepare(tag_add_book, "INSERT INTO books (title, author, year, ISBN) VALUES ($1, $2, $3, $4)"_zv);
         conn.prepare(tag_add_book_null_isbn, "INSERT INTO books (title, author, year, ISBN) VALUES ($1, $2, $3, NULL)"_zv);
 
-        constexpr auto result_ok = R"({"result": true})"sv;
-        constexpr auto result_not_ok = R"({"result": false})"sv;
+        constexpr auto result_ok = R"({"result":true})"sv;
+        constexpr auto result_not_ok = R"({"result":false})"sv;
 
         std::string request;
 
