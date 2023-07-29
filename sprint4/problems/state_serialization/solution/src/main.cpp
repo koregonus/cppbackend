@@ -189,12 +189,6 @@ int main(int argc, const char* argv[]) {
                     AppFacade.SetRandomSpawn();
                 }
 
-                // if((*args).backup_mode)
-                // {
-                //     game.BackupGame((*args).backup_file);
-                //     // std::cout << "backup: " <<  (*args).backup_file << std::endl;
-                // }
-
                 auto timer = std::make_shared<app_support::Ticker>(api_strand, std::chrono::milliseconds(timer_period), (*args).tick_set, [&AppFacade](auto arg){
                             AppFacade.TimerTickAuto(arg);
                 });

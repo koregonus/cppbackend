@@ -52,8 +52,7 @@ public:
         , speed_(dog.GetDogSpeedVec())
         , direction_(dog.GetDogDirection())
         , score_(dog.GetScore())
-        , road_idx(dog.GetRoadIdx())
-        /*, bag_content_(dog.GetBagContent())*/ {
+        , road_idx(dog.GetRoadIdx()) {
         auto loot_bag = dog.GetLootBag();
         for(const auto& item : loot_bag)
         {
@@ -63,15 +62,12 @@ public:
 
     [[nodiscard]] std::shared_ptr<model::Dog> Restore(const model::Map* map_ptr) const {
         std::shared_ptr<model::Dog> dog_ptr = std::make_shared<model::Dog>(id_, name_, pos_.x, pos_.y, map_ptr, road_idx);
-        // model::Dog dog{id_, name_, pos_.x, pos_.y, map_ptr, road_idx};
         dog_ptr->TrySetDogCount(*id_);
         dog_ptr->SetDogSpeedVec(speed_);
         dog_ptr->SetDogDirection(direction_);
         dog_ptr->AddToScore(score_);
-        for (const auto& item : bag_content_) {
-            // if (!dog.PutToBag(item)) {
-                // throw std::runtime_error("Failed to put bag content");
-            // }
+        for (const auto& item : bag_content_) 
+        {
             dog_ptr->AddToLootBag(item.id, item.type);
         }
         return dog_ptr;
@@ -99,26 +95,12 @@ private:
     int score_ = 0;
     std::vector<model::DoggyLoot> bag_content_;
     int road_idx = 0;
-    // model::Dog::BagContent bag_content_;
-    // model::Dog_mv_param dog_coords_;
 };
-
-// struct GameBackupHeader
-// {
-//     uint32_t sessions = 0;
-//     template <typename Archive>
-//     void serialize(Archive& ar, [[maybe_unused]] const unsigned version) {
-//         ar& sessions;
-
-//     }
-
-// };
 
 
 
 struct GameSessionRepr
 {
-// public:
     GameSessionRepr() = default;
 
     GameSessionRepr(model::GameSession& session)
@@ -153,11 +135,10 @@ struct GameSessionRepr
 
 struct GlobalArchieve
 {
-    // std::vector<DogRepr> dog_reprs;
     std::vector<GameSessionRepr> game_session_reprs;
     template <typename Archive>
     void serialize(Archive& ar, [[maybe_unused]] const unsigned version) {
-        // ar& dog_reprs;
+
         ar& game_session_reprs;
     }
 };

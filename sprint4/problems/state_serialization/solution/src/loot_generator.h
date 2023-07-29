@@ -5,16 +5,6 @@
 
 namespace loot_gen {
 
-
-
-// double inline loot_random()
-// {
-//     std::random_device rd;  // Will be used to obtain a seed for the random number engine
-//     std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-//     std::uniform_real_distribution<> dis(0.0, 1.0);
-//     return dis(gen);
-// }
-
 /*
  *  Генератор трофеев
  */
@@ -48,10 +38,6 @@ public:
 
 private:
     static double DefaultGenerator() noexcept {
-        // std::random_device rd;  // Will be used to obtain a seed for the random number engine
-        // std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-        // std::uniform_real_distribution<> dis(0.0, 1.0);
-        // return dis(gen);
         return 1.0;
     };
     TimeInterval base_interval_;

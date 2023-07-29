@@ -489,8 +489,6 @@ struct LootObj
     LootObj(int type, double x, double y, double width, double value): type_(type), x_(x), y_(y), 
                                                                         width_(width), value_(value){}
     
-    // LootObj(const LootObj& loot): type_(loot.type_), x_(loot.x_), y_(loot.y_), 
-    //                         width_(loot.width_), value_(loot.value_){}
     int type_;
     double x_;
     double y_;
@@ -608,7 +606,6 @@ public:
     }
 
     std::shared_ptr<GameSession> GetSession() const {
-        // GameSession* ret = session_;
         return session_;
     }
 
