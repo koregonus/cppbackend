@@ -41,8 +41,8 @@ std::vector<std::pair<std::string, int>> AuthorRepositoryImpl::ShowAuthorBooks(c
 {
     pqxx::read_transaction read_trans(connection_);
     std::vector<std::pair<std::string, int>> vec = {};
-    for (auto [title, year] : read_trans.query<std::string, int>("SELECT title, year FROM books WHERE author_id=" + read_trans.quote(author_id)
-                                                                       +  " ORDER BY year ASC, title ASC")) {
+    for (auto [title, year] : read_trans.query<std::string, int>("SELECT title, publication_year FROM books WHERE author_id=" + read_trans.quote(author_id)
+                                                                       +  " ORDER BY publication_year ASC, title ASC")) {
         vec.push_back(std::pair{title, year});
     }
     return vec;
@@ -51,7 +51,7 @@ std::vector<std::pair<std::string, int>> AuthorRepositoryImpl::ShowAuthorBooks(c
 std::vector<std::pair<std::string, int>> AuthorRepositoryImpl::ShowBooks()
 {
     pqxx::read_transaction read_trans(connection_);
-    auto query_text = "SELECT title, year FROM books ORDER BY title ASC"_zv;
+    auto query_text = "SELECT title, publication_year FROM books ORDER BY title ASC"_zv;
     std::vector<std::pair<std::string, int>> vec = {};
     for (auto [title, year] : read_trans.query<std::string, int>(query_text)) {
         vec.push_back(std::pair{title, year});
@@ -67,7 +67,7 @@ void AuthorRepositoryImpl::SaveBook(const domain::Book& book) {
     pqxx::work work{connection_};
     work.exec_params(
         R"(
-INSERT INTO books (id, author_id, title, year) VALUES ($1, $2, $3, $4)
+INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4)
 ON CONFLICT (id) DO UPDATE SET title=$3;
 )"_zv,
         book.GetId().ToString(), book.GetAuthorId().ToString(), book.GetTitle(), book.GetPubYear());
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS authors (
     work.exec(R"(
 CREATE TABLE IF NOT EXISTS books (
     id UUID CONSTRAINT book_id_constraint PRIMARY KEY, author_id UUID,
-    title varchar(100) UNIQUE NOT NULL, year integer NOT NULL
+    title varchar(100) UNIQUE NOT NULL, publication_year integer NOT NULL
 );
 )"_zv);
 
