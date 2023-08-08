@@ -611,6 +611,7 @@ std::optional<detail::AddBookParams> View::GetBookParams(std::istream& cmd_input
 
     if(cmd_input.fail())
     {
+        output_ << "Failed to add book" << std::endl;
         return std::nullopt;
     }
 

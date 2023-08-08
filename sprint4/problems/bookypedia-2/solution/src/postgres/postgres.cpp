@@ -133,6 +133,7 @@ ON CONFLICT (id) DO UPDATE SET title=$3;
     if(book.GetTagsSize() > 0)
     {
         auto tags_local = book.GetTags();
+        std::sort(tags_local.begin(), tags_local.end());
         for(auto& item : tags_local)
         {
             work.exec_params(
