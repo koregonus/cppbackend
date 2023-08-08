@@ -531,7 +531,7 @@ bool View::EditAuthor(std::istream& cmd_input) const
         auto author_id = SelectAuthor();
         if (not author_id.has_value())
         {
-            output_ << "Failed to delete author" << std::endl;
+            output_ << "Failed to edit author" << std::endl;
         }
         else {
             try{
@@ -561,7 +561,7 @@ bool View::EditAuthor(std::istream& cmd_input) const
         boost::algorithm::trim(str);
         if(str.size() == 0)
         {
-            output_ << "Failed to delete author" << std::endl;
+            output_ << "Failed to edit author" << std::endl;
             return true;
         }
         else
@@ -574,7 +574,7 @@ bool View::EditAuthor(std::istream& cmd_input) const
                     try{
                         std::string new_name;
                         output_ << "Enter new name:" << std::endl;
-                        if(!std::getline(cmd_input, new_name) || new_name.empty())
+                        if(!std::getline(input_, new_name) || new_name.empty())
                         {
                             throw std::exception();
                         }
@@ -584,18 +584,17 @@ bool View::EditAuthor(std::istream& cmd_input) const
                         {
                             throw std::exception();   
                         }
-
                         use_cases_.EditAuthor(std::move(item.id), std::move(new_name));
                         return true;
                     }
                     catch(...)
                     {
-                        output_ << "Failed to delete author" << std::endl;
+                        output_ << "Failed to edit author" << std::endl;
                         break;
                     }
                 }
             }
-            output_ << "Failed to delete author" << std::endl;
+            output_ << "Failed to edit author" << std::endl;
         }
     }
     return true;
