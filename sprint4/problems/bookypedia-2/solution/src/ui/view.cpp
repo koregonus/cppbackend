@@ -244,6 +244,10 @@ std::string View::FillTitleData(std::string& original_title) const
     {
         boost::algorithm::trim(in_buffer);
     }
+    if(in_buffer.empty())
+    {
+        in_buffer = original_title;
+    }
     return in_buffer;
 }
 
@@ -640,7 +644,7 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
     }
 
     int author_idx = 0;
-    if(str.empty())
+    if(!std::getline(input_, str) || str.empty())
     {
         // empty logic
         PrintVector(output_, authors);
