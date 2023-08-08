@@ -200,7 +200,11 @@ bool View::ShowBook(std::istream& cmd_input) const
                 found_books.push_back(item);
             }
         }
-        if(found_books.size() == 1)
+        if(found_books.size() == 0)
+        {
+            return true;
+        }
+        else if(found_books.size() == 1)
         {
             auto result = use_cases_.ShowBook(std::move(found_books[0].book_id));
             output_ << result;
