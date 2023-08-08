@@ -263,7 +263,10 @@ int View::FillPubYearData(int original_pub_year) const
     if(!(!std::getline(input_, in_buffer) || in_buffer.empty()))
     {
         boost::algorithm::trim(in_buffer);
-        ret = std::stoi(in_buffer); 
+        if(!in_buffer.empty())
+        {
+            ret = std::stoi(in_buffer); 
+        }
     }
     return ret;
 }
@@ -301,6 +304,7 @@ std::vector<std::string> View::FillTagsData(std::vector<std::string>& tags) cons
                     (ret).push_back(tag_item);
                 }
             }
+            std::sort(ret.begin(), ret.end());
             if((ret).size() == 0)
             {
                  ret = tags;
