@@ -159,6 +159,8 @@ std::optional<std::vector<std::string>> View::EnterTags() const
 
         if (!(std::find((*ret).begin(), (*ret).end(), tag_item) != (*ret).end()))
         {
+            if(tag_item.size() == 0)
+                continue;
           // Element in vector.
             (*ret).push_back(tag_item);
         }
@@ -603,6 +605,8 @@ bool View::EditAuthor(std::istream& cmd_input) const
 std::optional<detail::AddBookParams> View::GetBookParams(std::istream& cmd_input) const {
     detail::AddBookParams params;
 
+    // std::cout << "entered to GBP\n";
+
     cmd_input >> params.publication_year;
 
     if(cmd_input.fail())
@@ -614,6 +618,7 @@ std::optional<detail::AddBookParams> View::GetBookParams(std::istream& cmd_input
 
     boost::algorithm::trim(params.title);
 
+    // std::cout << "try select author\n";
     auto author_id = SelectAuthorAdvanced(true);
     if (not author_id.has_value())
         return std::nullopt;
@@ -625,7 +630,6 @@ std::optional<detail::AddBookParams> View::GetBookParams(std::istream& cmd_input
 }
 
 std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
-    output_ << "Select author:" << std::endl;
     auto authors = GetAuthors();
     output_ << "Enter author name or empty line to select from list:" << std::endl;
 
