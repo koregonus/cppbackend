@@ -644,7 +644,7 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
     }
 
     int author_idx = 0;
-    if(!std::getline(input_, str) || str.empty())
+    if(str.empty())
     {
         // empty logic
         PrintVector(output_, authors);
