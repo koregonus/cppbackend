@@ -99,8 +99,8 @@ void AuthorRepositoryImpl::DeleteAuthor(const std::string& author_id)
 void AuthorRepositoryImpl::DeleteBook(const std::string& book_id)
 {
     pqxx::work work{connection_};
-    work.exec("DELETE FROM books WHERE id=" + work.quote(book_id));
     work.exec("DELETE FROM book_tags WHERE book_id=" + work.quote(book_id));
+    work.exec("DELETE FROM books WHERE id=" + work.quote(book_id));
     work.commit(); 
 }
 

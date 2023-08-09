@@ -468,6 +468,10 @@ bool View::DeleteBook(std::istream& cmd_input) const
                 output_ << "Failed to delete book" << std::endl;
             }
         }
+        else if(found_books.size() == 0)
+        {
+            output_ << "Failed to delete book" << std::endl;
+        }
         else
         {
             PrintVector(output_, found_books);
