@@ -28,9 +28,9 @@ ON CONFLICT (id) DO UPDATE SET name=$2;
 
 std::vector<std::pair<std::string, std::string>> AuthorRepositoryImpl::ShowAuthors() {
     pqxx::read_transaction read_trans(connection_);
-    auto query_text = "SELECT name, id FROM authors ORDER BY name ASC"_zv;
+    auto query_text = "SELECT id, name FROM authors ORDER BY name;"_zv;
     std::vector<std::pair<std::string, std::string>> vec;
-    for (auto [name, id] : read_trans.query<std::string, std::string>(query_text)) {
+    for (auto [id, name] : read_trans.query<std::string, std::string>(query_text)) {
         vec.push_back(std::pair{name, (id)});
     }
 
@@ -143,6 +143,14 @@ ON CONFLICT (id) DO UPDATE SET title=$3;
                 book.GetId().ToString(), item);
         }
     }
+    else
+    {
+        work.exec_params(
+                R"(
+            INSERT INTO book_tags (book_id, tag) VALUES ($1, $2)
+            )"_zv,
+                book.GetId().ToString(), NULL);
+    }
     work.commit();
 }
 
@@ -180,7 +188,7 @@ CREATE TABLE IF NOT EXISTS books (
     work.exec(R"(
 CREATE TABLE IF NOT EXISTS book_tags (
     book_id UUID,
-    tag varchar(30) NOT NULL PRIMARY KEY
+    tag varchar(30) PRIMARY KEY
 );
 )"_zv);
 
