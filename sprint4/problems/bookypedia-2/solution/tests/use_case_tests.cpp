@@ -22,6 +22,11 @@ struct MockAuthorRepository : domain::AuthorRepository {
         ;
     }
 
+    void SaveBook(const domain::Author& author, const domain::Book& book) override
+    {
+        ;
+    }
+
     std::vector<std::pair<std::string, int>> ShowAuthorBooks(const std::string& author_id) override
     {
         std::vector<std::pair<std::string, int>> vec;

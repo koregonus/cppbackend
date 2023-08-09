@@ -18,6 +18,8 @@ public:
     std::vector<std::pair<std::string, std::string>> ShowAuthors() override;
 
     void SaveBook(const domain::Book& book) override;
+    
+    void SaveBook(const domain::Author& author, const domain::Book& book) override;
 
     std::vector<std::pair<std::string, int>> ShowAuthorBooks(const std::string& author_id) override;
     

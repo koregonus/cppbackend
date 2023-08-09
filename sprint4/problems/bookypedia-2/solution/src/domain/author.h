@@ -90,6 +90,7 @@ public:
     virtual void Save(const Author& author) = 0;
     virtual std::vector<std::pair<std::string, std::string>> ShowAuthors() = 0;
     virtual void SaveBook(const Book& book) = 0;
+    virtual void SaveBook(const Author& author, const Book& book) = 0;
     virtual std::vector<std::pair<std::string, int>> ShowAuthorBooks(const std::string& author_id) = 0;
     virtual std::vector<show_book_t> ShowBooks() = 0;
     virtual void DeleteAuthor(const std::string& author_id) = 0;

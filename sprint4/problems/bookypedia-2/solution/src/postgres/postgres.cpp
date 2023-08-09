@@ -127,6 +127,7 @@ void AuthorRepositoryImpl::SaveBook(const domain::Book& book) {
     // запросов выполнить в рамках одной транзакции.
     // Вы также может самостоятельно почитать информацию про этот паттерн и применить его здесь.
     pqxx::work work{connection_};
+    std::cout << book.GetAuthorId().ToString() << std::endl;
     
     work.exec("START TRANSACTION;");
     work.exec_params(
@@ -148,14 +149,44 @@ ON CONFLICT (id) DO UPDATE SET title=$3;
                 book.GetId().ToString(), item);
         }
     }
-    // else
-    // {
-    //     work.exec_params(
-    //             R"(
-    //         INSERT INTO book_tags (book_id, tag) VALUES ($1, $2)
-    //         )"_zv,
-    //             book.GetId().ToString(), NULL);
-    // }
+    work.commit();
+}
+
+void AuthorRepositoryImpl::SaveBook(const domain::Author& author, const domain::Book& book) {
+    // Пока каждое обращение к репозиторию выполняется внутри отдельной транзакции
+    // В будущих уроках вы узнаете про паттерн Unit of Work, при помощи которого сможете несколько
+    // запросов выполнить в рамках одной транзакции.
+    // Вы также может самостоятельно почитать информацию про этот паттерн и применить его здесь.
+    pqxx::work work{connection_};
+    
+    work.exec("START TRANSACTION;");
+    work.exec_params(
+        R"(
+INSERT INTO authors (id, name) VALUES ($1, $2)
+ON CONFLICT (id) DO UPDATE SET name=$2;
+)"_zv,
+        author.GetId().ToString(), author.GetName());
+
+
+    work.exec_params(
+        R"(
+INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4)
+ON CONFLICT (id) DO UPDATE SET title=$3;
+)"_zv,
+        book.GetId().ToString(), book.GetAuthorId().ToString(), book.GetTitle(), book.GetPubYear());
+    if(book.GetTagsSize() > 0)
+    {
+        auto tags_local = book.GetTags();
+
+        for(auto& item : tags_local)
+        {
+            work.exec_params(
+                R"(
+            INSERT INTO book_tags (book_id, tag) VALUES ($1, $2);
+            )"_zv,
+                book.GetId().ToString(), item);
+        }
+    }
     work.commit();
 }
 
