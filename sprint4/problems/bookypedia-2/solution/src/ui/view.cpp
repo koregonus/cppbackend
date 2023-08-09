@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& out, const BookInfo& book) {
 }  // namespace detail
 
 std::ostream& operator<<(std::ostream& out, const ShowBookInfo& book) {
-    out << book.title << " by " << book.author_name << ", " << book.publication_year;
+    out << book.id << " by " << book.author_name << ", " << book.publication_year;
     return out;
 }
 
@@ -72,7 +72,7 @@ View::View(menu::Menu& menu, app::UseCases& use_cases, std::istream& input, std:
     , output_{output} {
     menu_.AddAction(  //
         "AddAuthor"s, "name"s, "Adds author"s, std::bind(&View::AddAuthor, this, ph::_1)
-        // ëèáî
+        // Ã«Ã¨Ã¡Ã®
         // [this](auto& cmd_input) { return AddAuthor(cmd_input); }
     );
     menu_.AddAction("AddBook"s, "<pub year> <title>"s, "Adds book"s,
