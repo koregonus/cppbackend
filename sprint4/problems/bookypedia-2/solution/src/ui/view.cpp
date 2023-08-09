@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& out, const BookInfo& book) {
 }  // namespace detail
 
 std::ostream& operator<<(std::ostream& out, const ShowBookInfo& book) {
-    out << book.book_id << " by " << book.author_name << ", " << book.publication_year;
+    out << book.title << " by " << book.author_name << ", " << book.publication_year;
     return out;
 }
 
