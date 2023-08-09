@@ -17,6 +17,7 @@ void AuthorRepositoryImpl::Save(const domain::Author& author) {
     // запросов выполнить в рамках одной транзакции.
     // Вы также может самостоятельно почитать информацию про этот паттерн и применить его здесь.
     pqxx::work work{connection_};
+    work.exec("START TRANSACTION;");
     work.exec_params(
         R"(
 INSERT INTO authors (id, name) VALUES ($1, $2)
@@ -51,6 +52,7 @@ std::vector<std::pair<std::string, int>> AuthorRepositoryImpl::ShowAuthorBooks(c
 void AuthorRepositoryImpl::EditAuthor(const std::string& author_id, const std::string& new_name)
 {
     pqxx::work work{connection_};
+    work.exec("START TRANSACTION;");
     work.exec("UPDATE authors SET name=" + work.quote(new_name) + " WHERE id=" + work.quote(author_id));
     work.commit();
 }
@@ -58,7 +60,7 @@ void AuthorRepositoryImpl::EditAuthor(const std::string& author_id, const std::s
 void AuthorRepositoryImpl::EditBook(const show_single_book_t& book_data, const std::string& book_id)
 {
     pqxx::work work{connection_};
-    
+    work.exec("START TRANSACTION;");
     work.exec("UPDATE books SET title=" + work.quote(book_data.title) + " WHERE id=" + work.quote(book_id));
     
     work.exec("UPDATE books SET publication_year=" + work.quote(std::to_string(book_data.publication_year)) + " WHERE id=" + work.quote(book_id) + ";");
@@ -87,6 +89,7 @@ void AuthorRepositoryImpl::DeleteAuthor(const std::string& author_id)
     }
     read_trans.commit();
     pqxx::work work{connection_};
+    work.exec("START TRANSACTION;");
     for(auto& item : vec_books)
     {
         work.exec("DELETE FROM book_tags WHERE book_id=" + work.quote(item));
@@ -99,6 +102,7 @@ void AuthorRepositoryImpl::DeleteAuthor(const std::string& author_id)
 void AuthorRepositoryImpl::DeleteBook(const std::string& book_id)
 {
     pqxx::work work{connection_};
+    work.exec("START TRANSACTION;");
     work.exec("DELETE FROM book_tags WHERE book_id=" + work.quote(book_id));
     work.exec("DELETE FROM books WHERE id=" + work.quote(book_id));
     work.commit(); 
@@ -124,6 +128,7 @@ void AuthorRepositoryImpl::SaveBook(const domain::Book& book) {
     // Вы также может самостоятельно почитать информацию про этот паттерн и применить его здесь.
     pqxx::work work{connection_};
     
+    work.exec("START TRANSACTION;");
     work.exec_params(
         R"(
 INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4)
@@ -138,7 +143,7 @@ ON CONFLICT (id) DO UPDATE SET title=$3;
         {
             work.exec_params(
                 R"(
-            INSERT INTO book_tags (book_id, tag) VALUES ($1, $2)
+            INSERT INTO book_tags (book_id, tag) VALUES ($1, $2);
             )"_zv,
                 book.GetId().ToString(), item);
         }
@@ -173,22 +178,22 @@ Database::Database(pqxx::connection connection)
     pqxx::work work{connection_};
     work.exec(R"(
 CREATE TABLE IF NOT EXISTS authors (
-    id UUID CONSTRAINT author_id_constraint PRIMARY KEY,
-    name varchar(100) UNIQUE NOT NULL
+    id UUID CONSTRAINT firstindex PRIMARY KEY,
+    name varchar(100) UNIQUE NOT NULL UNIQUE
 );
 )"_zv);
     // ... создать другие таблицы
     work.exec(R"(
 CREATE TABLE IF NOT EXISTS books (
-    id UUID CONSTRAINT book_id_constraint PRIMARY KEY, author_id UUID,
-    title varchar(100) NOT NULL, publication_year integer NOT NULL
+    id UUID PRIMARY KEY,
+    title varchar(100) NOT NULL, publication_year INT, author_id UUID, CONSTRAINT fk_authors FOREIGN KEY(author_id) REFERENCES authors(id)
 );
 )"_zv);
 
     work.exec(R"(
 CREATE TABLE IF NOT EXISTS book_tags (
     book_id UUID,
-    tag varchar(30) PRIMARY KEY
+    tag varchar(30) NOT NULL, CONSTRAINT fk_books FOREIGN KEY(book_id) REFERENCES books(id)
 );
 )"_zv);
 

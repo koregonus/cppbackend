@@ -688,8 +688,8 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
         if (author_idx < 0 or author_idx >= authors.size()) {
             throw std::runtime_error("Invalid author num");
         }
-        std::cout << "id:" << authors[author_idx].id << std::endl;
-        std::cout << "idx:" << author_idx << std::endl;
+        // std::cout << "id:" << authors[author_idx].id << std::endl;
+        // std::cout << "idx:" << author_idx << std::endl;
         return authors[author_idx].id;
     }
     else
