@@ -727,7 +727,7 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
                 if(str.size() == 0)
                     throw std::exception();
                 name_buf = str;
-                // use_cases_.AddAuthor(std::move(str));
+                use_cases_.AddAuthor(std::move(str));
             } catch (const std::exception&) {
                 output_ << "Failed to add author"sv << std::endl;
                 return std::nullopt;
