@@ -319,6 +319,10 @@ std::vector<std::string> View::FillTagsData(std::vector<std::string>& tags) cons
                  ret = tags;
             }
         }
+        else
+        {
+            ret = tags;
+        }
     return ret;
 }
 
