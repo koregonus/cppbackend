@@ -435,7 +435,7 @@ bool View::DeleteBook(std::istream& cmd_input) const
         auto book_id = SelectBook();
         if (not book_id.has_value())
         {
-            output_ << "Failed to delete book" << std::endl;
+            output_ << "Book not found" << std::endl;
             return true;
         }
         else {
@@ -474,7 +474,7 @@ bool View::DeleteBook(std::istream& cmd_input) const
         }
         else if(found_books.size() == 0)
         {
-            output_ << "Failed to delete book" << std::endl;
+            output_ << "Book not found" << std::endl;
         }
         else
         {
