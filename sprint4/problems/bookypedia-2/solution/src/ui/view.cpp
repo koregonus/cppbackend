@@ -284,13 +284,11 @@ int View::FillPubYearData(int original_pub_year) const
 std::vector<std::string> View::FillTagsData(std::vector<std::string>& tags) const
 {
     std::vector<std::string> ret;
-    std::vector<std::string> buffer = tags;
-    bool start_tag = false;
     output_ << "Enter tags (current tags: ";
         for(int i = 0; i < tags.size(); i++)
         {
-            output_ << buffer[i];
-            if(i+1 != buffer.size())
+            output_ << tags[i];
+            if(i+1 != tags.size())
             {
                 output_ << ", ";
             }
@@ -311,18 +309,8 @@ std::vector<std::string> View::FillTagsData(std::vector<std::string>& tags) cons
 
                 if (!(std::find((ret).begin(), (ret).end(), tag_item) != (ret).end()))
                 {
-                    if(!start_tag)
-                    {
-                        start_tag = true;
-                        tags.clear();
-                        tags = {};
-                    }
                   // Element in vector.
-                    if(start_tag)
-                    {
-                        (tags).push_back(tag_item);
-
-                    }
+                    (ret).push_back(tag_item);
                 }
             }
             std::sort(ret.begin(), ret.end());
@@ -677,12 +665,12 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
     output_ << "Enter author name or empty line to select from list:" << std::endl;
 
     std::string str;
-    if (!std::getline(input_, str)) {
-        return std::nullopt;
-    }
+    // if (!std::getline(input_, str)) {
+    //     return std::nullopt;
+    // }
 
     int author_idx = 0;
-    if(str.empty())
+    if(!std::getline(input_, str) || str.empty())
     {
         // empty logic
         PrintVector(output_, authors);
@@ -700,6 +688,8 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
         if (author_idx < 0 or author_idx >= authors.size()) {
             throw std::runtime_error("Invalid author num");
         }
+        std::cout << "id:" << authors[author_idx].id << std::endl;
+        std::cout << "idx:" << author_idx << std::endl;
         return authors[author_idx].id;
     }
     else
