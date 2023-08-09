@@ -133,16 +133,14 @@ ON CONFLICT (id) DO UPDATE SET title=$3;
     if(book.GetTagsSize() > 0)
     {
         auto tags_local = book.GetTags();
-        
+
         for(auto& item : tags_local)
         {
             work.exec_params(
                 R"(
             INSERT INTO book_tags (book_id, tag) VALUES ($1, $2)
-            ON CONFLICT (tag) DO UPDATE SET tag=$2;
             )"_zv,
                 book.GetId().ToString(), item);
-            // std::cout << item << std::endl;
         }
     }
     work.commit();

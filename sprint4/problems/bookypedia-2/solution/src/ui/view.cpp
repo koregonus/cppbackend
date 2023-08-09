@@ -137,40 +137,49 @@ bool View::ShowAuthorBooks() const {
     return true;
 }
 
-std::optional<std::vector<std::string>> View::EnterTags() const
+std::vector<std::string> View::EnterTags() const
 {
-    std::optional<std::vector<std::string>> ret;
+    std::vector<std::string> ret;
     output_ << "Enter tags (comma separated):" << std::endl;
     std::string str;
-    if (!std::getline(input_, str) || str.empty()) {
-        return std::nullopt;
-    }
     ret = std::vector<std::string>{};
-    std::istringstream iss(str);
-    std::string tag_item;
-    while (std::getline(iss, tag_item, ',')) {
-        boost::algorithm::trim(tag_item);
-        auto it = std::unique(tag_item.begin(), tag_item.end(),
-            [](char const &lhs, char const &rhs) {
-                return (lhs == rhs) && (lhs == ' ');
-            });
- 
-        tag_item.erase(it, tag_item.end());
+    if (!std::getline(input_, str) || str.empty()) {
+        // return ret;
+    }
+    else
+    {
+        ret = std::vector<std::string>{};
+        std::istringstream iss(str);
+        std::string tag_item;
+        while (std::getline(iss, tag_item, ',')) {
+            boost::algorithm::trim(tag_item);
+            auto it = std::unique(tag_item.begin(), tag_item.end(),
+                [](char const &lhs, char const &rhs) {
+                    return (lhs == rhs) && (lhs == ' ');
+                });
+     
+            tag_item.erase(it, tag_item.end());
 
-        if (!(std::find((*ret).begin(), (*ret).end(), tag_item) != (*ret).end()))
-        {
-            if(tag_item.size() == 0)
-                continue;
-          // Element in vector.
-            (*ret).push_back(tag_item);
+            if (!(std::find((ret).begin(), (ret).end(), tag_item) != (ret).end()))
+            {
+                if(tag_item.size() == 0)
+                    continue;
+              // Element in vector.
+                (ret).push_back(tag_item);
+            }
+            if((ret).size() > 0)
+            {
+                std::sort((ret).begin(), (ret).end());
+            }
         }
     }
-    if((*ret).size() > 0)
-    {
-        return ret;
-    }
+    
+    // if((*ret).size() > 0)
+    // {
+    //     return ret;
+    // }
 
-    return std::nullopt;
+    return ret;
 }
 
 bool View::ShowBook(std::istream& cmd_input) const
@@ -624,6 +633,7 @@ std::optional<detail::AddBookParams> View::GetBookParams(std::istream& cmd_input
     if(cmd_input.fail())
     {
         output_ << "Failed to add book" << std::endl;
+        output_ << "cmd" << std::endl;
         return std::nullopt;
     }
 
