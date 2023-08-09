@@ -198,8 +198,9 @@ show_single_book_t AuthorRepositoryImpl::ShowBook(const std::string& book_id)
     ret.title = std::get<0>(first_row);
     ret.author_name = std::get<1>(first_row);
     ret.publication_year = std::get<2>(first_row);
-    for (auto [tags] : read_trans.query<std::string>("SELECT tag FROM book_tags WHERE book_id=" + read_trans.quote(book_id) + " AND tag!=NULL")) {
+    for (auto [tags] : read_trans.query<std::string>("SELECT tag FROM book_tags WHERE book_id=" + read_trans.quote(book_id) + ";")) {
         ret.tags.push_back(tags);
+        std::cout << tags << std::endl;
     }
     return ret;
 }
