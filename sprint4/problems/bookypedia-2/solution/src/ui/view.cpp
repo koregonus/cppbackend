@@ -314,15 +314,15 @@ std::vector<std::string> View::FillTagsData(std::vector<std::string>& tags) cons
                 }
             }
             std::sort(ret.begin(), ret.end());
-            if((ret).size() == 0)
-            {
-                 ret = tags;
-            }
+            // if((ret).size() == 0)
+            // {
+            //      ret = tags;
+            // }
         }
-        else
-        {
-            ret = tags;
-        }
+        // else
+        // {
+        //     ret = tags;
+        // }
     return ret;
 }
 
@@ -381,6 +381,11 @@ bool View::EditBook(std::istream& cmd_input) const
                 output_ << "Book not found" << std::endl;
                 return true;
             }
+        }
+        if(found_books.size() == 0)
+        {
+            output_ << "Book not found" << std::endl;
+            return true;
         }
         else
         {
@@ -654,7 +659,7 @@ std::optional<detail::AddBookParams> View::GetBookParams(std::istream& cmd_input
     if (not author_id.has_value())
         return std::nullopt;
     else {
-        params.author_id = author_id.value();
+        params.author_id = *author_id;
         params.tags = EnterTags();
         return params;
     }
@@ -668,6 +673,7 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
     // if (!std::getline(input_, str)) {
     //     return std::nullopt;
     // }
+
 
     int author_idx = 0;
     if(!std::getline(input_, str) || str.empty())
@@ -721,7 +727,7 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
                 if(str.size() == 0)
                     throw std::exception();
                 name_buf = str;
-                use_cases_.AddAuthor(std::move(str));
+                // use_cases_.AddAuthor(std::move(str));
             } catch (const std::exception&) {
                 output_ << "Failed to add author"sv << std::endl;
                 return std::nullopt;
@@ -735,6 +741,7 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
                 }
                 author_idx++;
             }
+            // return str;
             return std::nullopt;
         }
     }

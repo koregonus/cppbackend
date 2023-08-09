@@ -78,6 +78,10 @@ void AuthorRepositoryImpl::EditBook(const show_single_book_t& book_data, const s
                 book_id, item);
         }
     }
+    else if(book_data.tags.size() == 0)
+    {
+        work.exec("DELETE FROM book_tags WHERE book_id=" + work.quote(book_id) + " ;");
+    }
     work.exec("COMMIT;");
     work.commit(); 
 }

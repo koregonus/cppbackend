@@ -19,6 +19,7 @@ namespace detail {
 struct AddBookParams {
     std::string title;
     std::string author_id;
+    std::string author_name;
     int publication_year = 0;
     std::vector<std::string> tags;
 };
