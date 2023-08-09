@@ -284,11 +284,13 @@ int View::FillPubYearData(int original_pub_year) const
 std::vector<std::string> View::FillTagsData(std::vector<std::string>& tags) const
 {
     std::vector<std::string> ret;
+    std::vector<std::string> buffer = tags;
+    bool start_tag = false;
     output_ << "Enter tags (current tags: ";
         for(int i = 0; i < tags.size(); i++)
         {
-            output_ << tags[i];
-            if(i+1 != tags.size())
+            output_ << buffer[i];
+            if(i+1 != buffer.size())
             {
                 output_ << ", ";
             }
@@ -309,8 +311,18 @@ std::vector<std::string> View::FillTagsData(std::vector<std::string>& tags) cons
 
                 if (!(std::find((ret).begin(), (ret).end(), tag_item) != (ret).end()))
                 {
+                    if(!start_tag)
+                    {
+                        start_tag = true;
+                        tags.clear();
+                        tags = {};
+                    }
                   // Element in vector.
-                    (ret).push_back(tag_item);
+                    if(start_tag)
+                    {
+                        (tags).push_back(tag_item);
+
+                    }
                 }
             }
             std::sort(ret.begin(), ret.end());
@@ -641,7 +653,7 @@ std::optional<detail::AddBookParams> View::GetBookParams(std::istream& cmd_input
     if(cmd_input.fail())
     {
         output_ << "Failed to add book" << std::endl;
-        output_ << "cmd" << std::endl;
+        // output_ << "cmd" << std::endl;
         return std::nullopt;
     }
 

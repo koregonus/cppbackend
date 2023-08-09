@@ -143,14 +143,14 @@ ON CONFLICT (id) DO UPDATE SET title=$3;
                 book.GetId().ToString(), item);
         }
     }
-    else
-    {
-        work.exec_params(
-                R"(
-            INSERT INTO book_tags (book_id, tag) VALUES ($1, $2)
-            )"_zv,
-                book.GetId().ToString(), NULL);
-    }
+    // else
+    // {
+    //     work.exec_params(
+    //             R"(
+    //         INSERT INTO book_tags (book_id, tag) VALUES ($1, $2)
+    //         )"_zv,
+    //             book.GetId().ToString(), NULL);
+    // }
     work.commit();
 }
 
@@ -162,7 +162,7 @@ show_single_book_t AuthorRepositoryImpl::ShowBook(const std::string& book_id)
     ret.title = std::get<0>(first_row);
     ret.author_name = std::get<1>(first_row);
     ret.publication_year = std::get<2>(first_row);
-    for (auto [tags] : read_trans.query<std::string>("SELECT tag FROM book_tags WHERE book_id=" + read_trans.quote(book_id))) {
+    for (auto [tags] : read_trans.query<std::string>("SELECT tag FROM book_tags WHERE book_id=" + read_trans.quote(book_id) + " AND tag!=NULL")) {
         ret.tags.push_back(tags);
     }
     return ret;
