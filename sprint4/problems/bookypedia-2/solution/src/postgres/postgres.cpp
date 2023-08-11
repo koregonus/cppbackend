@@ -140,7 +140,7 @@ void AuthorRepositoryImpl::SaveBook(const domain::Book& book) {
     pqxx::work work{connection_};
     // std::cout << book.GetAuthorId().ToString() << std::endl;
     
-    work.exec("START TRANSACTION;");
+    // work.exec("START TRANSACTION;");
     work.exec_params(
         R"(
 INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4);
@@ -159,7 +159,7 @@ INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $
                 book.GetId().ToString(), item);
         }
     }
-    work.exec("COMMIT;");
+    // work.exec("COMMIT;");
     work.commit();
 }
 
