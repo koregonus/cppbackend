@@ -32,7 +32,7 @@ jobs:
         with:
           repository: 'cpppracticum/cpp-backend-tests-practicum'
           path: 'cpp-backend-tests-practicum'
-          ref: 'april'
+          ref: 'may'
 
       - name: Install dependencies
         run: |
@@ -106,7 +106,7 @@ jobs:
         with:
           repository: 'cpppracticum/cpp-backend-tests-practicum'
           path: 'cpp-backend-tests-practicum'
-          ref: 'april'
+          ref: 'may'
 
       - name: Install dependencies
         run: |
@@ -166,7 +166,7 @@ jobs:
         with:
           repository: 'cpppracticum/cpp-backend-tests-practicum'
           path: 'cpp-backend-tests-practicum'
-          ref: 'april'
+          ref: 'may'
 
       - name: Install dependencies
         run: |
@@ -286,7 +286,7 @@ jobs:
         with:
           repository: 'cpppracticum/cpp-backend-tests-practicum'
           path: 'cpp-backend-tests-practicum'
-          ref: 'april'
+          ref: 'may'
 
 
       - name: Install dependencies
@@ -326,7 +326,7 @@ jobs:
         with:
           repository: 'cpppracticum/cpp-backend-tests-practicum'
           path: 'cpp-backend-tests-practicum'
-          ref: 'april'
+          ref: 'may'
 
 
       - name: run tests sprint3 ammo
@@ -381,7 +381,7 @@ jobs:
         with:
           repository: 'cpppracticum/cpp-backend-tests-practicum'
           path: 'cpp-backend-tests-practicum'
-          ref: 'april'
+          ref: 'may'
 
       - name: Install dependencies
         run: |
