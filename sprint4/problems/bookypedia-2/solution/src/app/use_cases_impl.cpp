@@ -33,7 +33,7 @@ void UseCasesImpl::SaveBook(std::string& title, std::string& author_id, int pub_
 void UseCasesImpl::SaveBook(std::string& author_name, std::string& title, std::string& author_id, int pub_year, std::optional<std::vector<std::string>> tags)
 {
     auto new_author_id = AuthorId::New(); 
-    authors_.SaveBook({new_author_id, author_name}, {BookId::New(), title, new_author_id, pub_year});
+    authors_.SaveBook({new_author_id, author_name}, {BookId::New(), title, new_author_id, pub_year, *tags});
 }
 
 std::vector<std::pair<std::string, int>> UseCasesImpl::ShowAuthorBooks(const std::string& author_id)

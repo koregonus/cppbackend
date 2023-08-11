@@ -140,7 +140,7 @@ void AuthorRepositoryImpl::SaveBook(const domain::Book& book) {
     pqxx::work work{connection_};
     // std::cout << book.GetAuthorId().ToString() << std::endl;
     
-    // work.exec("START TRANSACTION;");
+    work.exec("START TRANSACTION;");
     work.exec_params(
         R"(
 INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4);
@@ -159,7 +159,7 @@ INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $
                 book.GetId().ToString(), item);
         }
     }
-    // work.exec("COMMIT;");
+    work.exec("COMMIT;");
     work.commit();
 }
 
@@ -202,8 +202,8 @@ INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $
 
 show_single_book_t AuthorRepositoryImpl::ShowBook(const std::string& book_id)
 {
-    std::chrono::milliseconds timespan(100); // or whatever
-    std::this_thread::sleep_for(timespan);
+    // std::chrono::milliseconds timespan(100); // or whatever
+    // std::this_thread::sleep_for(timespan);
     pqxx::read_transaction read_trans(connection_);
     show_single_book_t ret = {};
     auto first_row = read_trans.query1<std::string, std::string, int>("SELECT books.title, authors.name, books.publication_year FROM authors, books WHERE authors.id=books.author_id AND books.id=" + read_trans.quote(book_id) + " ;");
