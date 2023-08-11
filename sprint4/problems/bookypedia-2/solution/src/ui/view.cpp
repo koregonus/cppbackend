@@ -157,7 +157,7 @@ std::vector<std::string> View::EnterTags() const
     }
     else
     {
-        ret = std::vector<std::string>{};
+        // ret = std::vector<std::string>{};
         std::istringstream iss(str);
         std::string tag_item;
         while (std::getline(iss, tag_item, ',')) {
