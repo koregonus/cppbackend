@@ -140,10 +140,12 @@ void AuthorRepositoryImpl::SaveBook(const domain::Book& book) {
     pqxx::work work{connection_};
     // std::cout << book.GetAuthorId().ToString() << std::endl;
     
-    work.exec("START TRANSACTION;");
+    work.exec("BEGIN;");
+    work.exec("LOCK TABLE books IN ACCESS EXCLUSIVE MODE;");
+
     work.exec_params(
         R"(
-INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4);
+INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4)
 )"_zv,
         book.GetId().ToString(), book.GetAuthorId().ToString(), book.GetTitle(), book.GetPubYear());
     if(book.GetTagsSize() > 0)
@@ -170,7 +172,7 @@ INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $
         work.exec(query_text);
         // std::cout << query_text << std::endl;
     }
-    work.exec("COMMIT;");
+    work.exec("END;");
     work.commit();
 }
 
@@ -181,17 +183,18 @@ void AuthorRepositoryImpl::SaveBook(const domain::Author& author, const domain::
     // Вы также может самостоятельно почитать информацию про этот паттерн и применить его здесь.
     pqxx::work work{connection_};
     
-    work.exec("START TRANSACTION;");
+    work.exec("BEGIN;");
+    work.exec("LOCK TABLE books IN ACCESS EXCLUSIVE MODE;");
     work.exec_params(
         R"(
-INSERT INTO authors (id, name) VALUES ($1, $2);
+INSERT INTO authors (id, name) VALUES ($1, $2)
 )"_zv,
         author.GetId().ToString(), author.GetName());
 
 
     work.exec_params(
         R"(
-INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4);
+INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4)
 )"_zv,
         book.GetId().ToString(), book.GetAuthorId().ToString(), book.GetTitle(), book.GetPubYear());
     if(book.GetTagsSize() > 0)
@@ -212,7 +215,7 @@ INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $
         }
         work.exec(query_text);
     }
-    work.exec("COMMIT;");
+    // work.exec("COMMIT;");
     work.commit();
 }
 
