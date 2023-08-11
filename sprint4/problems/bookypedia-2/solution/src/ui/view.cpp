@@ -7,6 +7,7 @@
 
 #include "../app/use_cases.h"
 #include "../menu/menu.h"
+// #include "../postgres/unit_of_work.h"
 
 using namespace std::literals;
 namespace ph = std::placeholders;
@@ -105,8 +106,16 @@ bool View::AddAuthor(std::istream& cmd_input) const {
 bool View::AddBook(std::istream& cmd_input) const {
     try {
         if (auto params = GetBookParams(cmd_input)) {
-            use_cases_.SaveBook((*params).title, (*params).author_id,
+            if(not (*params).author_name.has_value())
+            {
+                use_cases_.SaveBook((*params).title, (*params).author_id,
                                 (*params).publication_year, (*params).tags);
+            }
+            else
+            {
+                use_cases_.SaveBook(*((*params).author_name) , (*params).title, (*params).author_id,
+                                (*params).publication_year, (*params).tags);
+            }
         }
     } catch (const std::exception&) {
         output_ << "Failed to add book"sv << std::endl;
@@ -638,16 +647,17 @@ bool View::EditAuthor(std::istream& cmd_input) const
 
 std::optional<detail::AddBookParams> View::GetBookParams(std::istream& cmd_input) const {
     detail::AddBookParams params;
-
+    std::optional<detail::AddBookParams> ret = std::nullopt;
     // std::cout << "entered to GBP\n";
 
     cmd_input >> params.publication_year;
 
     if(cmd_input.fail())
     {
-        output_ << "Failed to add book" << std::endl;
+        // output_ << "Failed to add book" << std::endl;
         // output_ << "cmd" << std::endl;
-        return std::nullopt;
+        // return std::nullopt;
+        throw std::exception();
     }
 
     std::getline(cmd_input, params.title);
@@ -655,17 +665,27 @@ std::optional<detail::AddBookParams> View::GetBookParams(std::istream& cmd_input
     boost::algorithm::trim(params.title);
 
     // std::cout << "try select author\n";
-    auto author_id = SelectAuthorAdvanced(true);
-    if (not author_id.has_value())
-        return std::nullopt;
+    std::optional<std::string> author_name = std::nullopt;
+    auto author_id = SelectAuthorAdvanced(author_name);
+    if (not author_id.has_value() and not author_name.has_value())
+        ret = std::nullopt;
     else {
-        params.author_id = *author_id;
+        if(not author_name.has_value())
+        {
+            params.author_id = *author_id;
+        }
+        else
+        {
+            // params.author_id = use_cases_.GetUUID();
+            params.author_name = author_name;
+        }
         params.tags = EnterTags();
-        return params;
+        ret = params;
     }
+    return ret;
 }
 
-std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
+std::optional<std::string> View::SelectAuthorAdvanced(std::optional<std::string>& author_name) const {
     auto authors = GetAuthors();
     output_ << "Enter author name or empty line to select from list:" << std::endl;
 
@@ -708,10 +728,10 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
             }
             author_idx++;
         }
-        if(!NeedCreation)
-        {
-            return std::nullopt;
-        }
+        // if(!NeedCreation)
+        // {
+        //     return std::nullopt;
+        // }
         std::string add_author_mark;
         output_ << "No author found. Do you want to add " << str << " (y/n)?" << std::endl;
         if (!std::getline(input_, add_author_mark) || str.empty() || (add_author_mark != "y" && add_author_mark != "Y")) {
@@ -721,26 +741,29 @@ std::optional<std::string> View::SelectAuthorAdvanced(bool NeedCreation) const {
         else
         {
             author_idx = 0;
-            std::string name_buf;
+            // std::string name_buf;
             try {
                 boost::algorithm::trim(str);
                 if(str.size() == 0)
                     throw std::exception();
-                name_buf = str;
-                use_cases_.AddAuthor(std::move(str));
+                // name_buf = str;
+                // use_cases_.AddAuthor(std::move(str));
+                author_name = str;
+                // params.author_name = str;
             } catch (const std::exception&) {
                 output_ << "Failed to add author"sv << std::endl;
                 return std::nullopt;
             }
-            authors = GetAuthors();
-            for(auto& item : authors)
-            {
-                if(item.name == name_buf)
-                {
-                    return authors[author_idx].id;
-                }
-                author_idx++;
-            }
+            // authors = GetAuthors();
+            // for(auto& item : authors)
+            // {
+            //     if(item.name == name_buf)
+            //     {
+            //         return authors[author_idx].id;
+            //     }
+            //     author_idx++;
+            // }
+            // return params;
             // return str;
             return std::nullopt;
         }

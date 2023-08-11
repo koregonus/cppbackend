@@ -44,6 +44,8 @@ add_library(libbookypedia STATIC
 	src/util/tagged_uuid.h
 	src/postgres/postgres.cpp
 	src/postgres/postgres.h
+	# src/postgres/unit_of_work.h
+	# src/postgres/unit_of_work.cpp
 )
 target_link_libraries(libbookypedia PUBLIC CONAN_PKG::boost Threads::Threads CONAN_PKG::libpq CONAN_PKG::libpqxx)
 

@@ -19,7 +19,7 @@ namespace detail {
 struct AddBookParams {
     std::string title;
     std::string author_id;
-    std::string author_name;
+    std::optional<std::string> author_name;
     int publication_year = 0;
     std::vector<std::string> tags;
 };
@@ -62,7 +62,7 @@ private:
     std::optional<detail::AddBookParams> GetBookParams(std::istream& cmd_input) const;
     std::optional<std::string> SelectAuthor() const;
     std::optional<std::string> SelectBook() const;
-    std::optional<std::string> SelectAuthorAdvanced(bool NeedCreation) const;
+    std::optional<std::string> SelectAuthorAdvanced(std::optional<std::string>& name) const;
     std::vector<detail::AuthorInfo> GetAuthors() const;
     std::vector<show_book_t> GetBooks() const;
     std::vector<detail::BookInfo> GetAuthorBooks(const std::string& author_id) const;

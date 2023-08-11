@@ -13,6 +13,11 @@ std::vector<std::pair<std::string, std::string>> UseCasesImpl::ShowAuthors() {
     return authors_.ShowAuthors();
 }
 
+std::string UseCasesImpl::GetUUID()
+{
+    return AuthorId::New().ToString();
+}
+
 void UseCasesImpl::SaveBook(std::string& title, std::string& author_id, int pub_year, std::optional<std::vector<std::string>> tags)
 {
     if(tags)
@@ -23,6 +28,12 @@ void UseCasesImpl::SaveBook(std::string& title, std::string& author_id, int pub_
     {
         authors_.SaveBook({BookId::New(), title, AuthorId::FromString(author_id), pub_year});
     }
+}
+
+void UseCasesImpl::SaveBook(std::string& author_name, std::string& title, std::string& author_id, int pub_year, std::optional<std::vector<std::string>> tags)
+{
+    auto new_author_id = AuthorId::New(); 
+    authors_.SaveBook({new_author_id, author_name}, {BookId::New(), title, new_author_id, pub_year});
 }
 
 std::vector<std::pair<std::string, int>> UseCasesImpl::ShowAuthorBooks(const std::string& author_id)
