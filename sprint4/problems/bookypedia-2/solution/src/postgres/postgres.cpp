@@ -150,14 +150,14 @@ INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $
     {
         auto tags_local = book.GetTags();
 
-        for(auto& item : tags_local)
-        {
+        // for(auto& item : tags_local)
+        // {
             work.exec_params(
                 R"(
             INSERT INTO book_tags (book_id, tag) VALUES ($1, $2);
             )"_zv,
-                book.GetId().ToString(), item);
-        }
+                book.GetId().ToString(), tags_local);
+        // }
     }
     work.exec("COMMIT;");
     work.commit();
