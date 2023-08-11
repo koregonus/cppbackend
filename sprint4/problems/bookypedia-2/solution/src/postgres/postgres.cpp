@@ -149,15 +149,26 @@ INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $
     if(book.GetTagsSize() > 0)
     {
         auto tags_local = book.GetTags();
-
-        // for(auto& item : tags_local)
-        // {
-            work.exec_params(
-                R"(
-            INSERT INTO book_tags (book_id, tag) VALUES ($1, $2);
-            )"_zv,
-                book.GetId().ToString(), tags_local);
-        // }
+        std::string query_text("INSERT INTO book_tags (book_id, tag) VALUES ");
+        for(int i = 0; i < tags_local.size(); i++)
+        {
+            query_text.append("(" + work.quote(book.GetId().ToString()) + "," + work.quote(tags_local[i]) + ")");
+            if(i == tags_local.size()-1)
+            {
+                query_text.append(";");
+            }
+            else
+            {
+                query_text.append(",");   
+            }
+            // work.exec_params(
+            //     R"(
+            // INSERT INTO book_tags (book_id, tag) VALUES ($1, $2);
+            // )"_zv,
+            //     book.GetId().ToString(), tags_local);
+        }
+        work.exec(query_text);
+        // std::cout << query_text << std::endl;
     }
     work.exec("COMMIT;");
     work.commit();
@@ -186,15 +197,20 @@ INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $
     if(book.GetTagsSize() > 0)
     {
         auto tags_local = book.GetTags();
-
-        for(auto& item : tags_local)
+        std::string query_text("INSERT INTO book_tags (book_id, tag) VALUES ");
+        for(int i = 0; i < tags_local.size(); i++)
         {
-            work.exec_params(
-                R"(
-            INSERT INTO book_tags (book_id, tag) VALUES ($1, $2);
-            )"_zv,
-                book.GetId().ToString(), item);
+            query_text.append("(" + work.quote(book.GetId().ToString()) + "," + work.quote(tags_local[i]) + ")");
+            if(i == tags_local.size()-1)
+            {
+                query_text.append(";");
+            }
+            else
+            {
+                query_text.append(",");   
+            }
         }
+        work.exec(query_text);
     }
     work.exec("COMMIT;");
     work.commit();
