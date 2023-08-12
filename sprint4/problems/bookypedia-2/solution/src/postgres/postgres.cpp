@@ -185,7 +185,7 @@ void AuthorRepositoryImpl::SaveBook(const domain::Author& author, const domain::
     
     // work.exec("BEGIN;");
     // work.exec("LOCK TABLE book_tags IN ACCESS EXCLUSIVE MODE;");
-    std::string query_text("INSERT INTO authors (id, name) VALUES (");
+    std::string query_text("BEGIN; LOCK TABLE book_tags IN ACCESS EXCLUSIVE MODE; INSERT INTO authors (id, name) VALUES (");
     query_text.append(work.quote(author.GetId().ToString()) + "," + work.quote(author.GetName()) + ");");
 
 //     work.exec_params(
@@ -222,7 +222,8 @@ void AuthorRepositoryImpl::SaveBook(const domain::Author& author, const domain::
             }
         }
     }
-    std::cout << query_text << std::endl;
+    // std::cout << query_text << std::endl;
+    query_text.append("COMMIT;"); 
     work.exec(query_text);
     // work.exec("COMMIT;");
     work.commit();
