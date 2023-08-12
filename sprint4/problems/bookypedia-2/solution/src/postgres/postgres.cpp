@@ -183,24 +183,32 @@ void AuthorRepositoryImpl::SaveBook(const domain::Author& author, const domain::
     // Вы также может самостоятельно почитать информацию про этот паттерн и применить его здесь.
     pqxx::work work{connection_};
     
-    work.exec("BEGIN;");
-    work.exec("LOCK TABLE book_tags IN ACCESS EXCLUSIVE MODE;");
-    work.exec_params(
-        R"(
-INSERT INTO authors (id, name) VALUES ($1, $2)
-)"_zv,
-        author.GetId().ToString(), author.GetName());
+    // work.exec("BEGIN;");
+    // work.exec("LOCK TABLE book_tags IN ACCESS EXCLUSIVE MODE;");
+    std::string query_text("INSERT INTO authors (id, name) VALUES (");
+    query_text.append(work.quote(author.GetId().ToString()) + "," + work.quote(author.GetName()) + ");");
+
+//     work.exec_params(
+//         R"(
+// INSERT INTO authors (id, name) VALUES ($1, $2)
+// )"_zv,
+//         author.GetId().ToString(), author.GetName());
 
 
-    work.exec_params(
-        R"(
-INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4)
-)"_zv,
-        book.GetId().ToString(), book.GetAuthorId().ToString(), book.GetTitle(), book.GetPubYear());
+//     work.exec_params(
+//         R"(
+// INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $4)
+// )"_zv,
+//         book.GetId().ToString(), book.GetAuthorId().ToString(), book.GetTitle(), book.GetPubYear());
+
+    query_text.append("INSERT INTO books (id, author_id, title, publication_year) VALUES (");
+    query_text.append(work.quote(book.GetId().ToString()) + "," + work.quote(book.GetAuthorId().ToString()) + "," + work.quote(book.GetTitle()) + "," + work.quote(book.GetPubYear()) + ");");
+
+
     if(book.GetTagsSize() > 0)
     {
         auto tags_local = book.GetTags();
-        std::string query_text("INSERT INTO book_tags (book_id, tag) VALUES ");
+        query_text.append("INSERT INTO book_tags (book_id, tag) VALUES ");
         for(int i = 0; i < tags_local.size(); i++)
         {
             query_text.append("(" + work.quote(book.GetId().ToString()) + "," + work.quote(tags_local[i]) + ")");
@@ -213,9 +221,10 @@ INSERT INTO books (id, author_id, title, publication_year) VALUES ($1, $2, $3, $
                 query_text.append(",");   
             }
         }
-        work.exec(query_text);
     }
-    work.exec("COMMIT;");
+    std::cout << query_text << std::endl;
+    work.exec(query_text);
+    // work.exec("COMMIT;");
     work.commit();
 }
 
