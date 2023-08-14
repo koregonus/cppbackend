@@ -16,7 +16,9 @@ namespace ui {
 namespace detail {
 
 std::ostream& operator<<(std::ostream& out, const AuthorInfo& author) {
+    // out << " \n";
     out << author.name;
+    // out << "\n";
     return out;
 }
 
@@ -46,6 +48,15 @@ std::ostream& operator<<(std::ostream& out, const show_single_book_t& book) {
         out << "Tags: ";
         for(int i = 0; i < book.tags.size(); i++)
         {
+            if(book.tags[i] == "# ")
+            {
+                out << "#";
+            }
+            else if(book.tags[i] == ", , , ,")
+            {
+                continue;
+            }
+            //     // continue;
             out << book.tags[i];
             if((i+1) < book.tags.size())
             {
@@ -65,6 +76,15 @@ void PrintVector(std::ostream& out, const std::vector<T>& vector) {
         out << i++ << " " << value << std::endl;
     }
 }
+
+template <typename T>
+void PrintVectorCustom(std::ostream& out, const std::vector<T>& vector) {
+    int i = 1;
+    for (auto& value : vector) {
+        out << " =\n" << i++ << " " << value << std::endl << " =\n";
+    }
+}
+
 
 View::View(menu::Menu& menu, app::UseCases& use_cases, std::istream& input, std::ostream& output)
     : menu_{menu}
@@ -319,6 +339,7 @@ std::vector<std::string> View::FillTagsData(std::vector<std::string>& tags) cons
                 if (!(std::find((ret).begin(), (ret).end(), tag_item) != (ret).end()))
                 {
                   // Element in vector.
+                    if(!tag_item.empty() && tag_item != ",")
                     (ret).push_back(tag_item);
                 }
             }
@@ -391,7 +412,7 @@ bool View::EditBook(std::istream& cmd_input) const
                 return true;
             }
         }
-        if(found_books.size() == 0)
+        else if(found_books.size() == 0)
         {
             output_ << "Book not found" << std::endl;
             return true;
@@ -449,7 +470,7 @@ bool View::DeleteBook(std::istream& cmd_input) const
         auto book_id = SelectBook();
         if (not book_id.has_value())
         {
-            output_ << "Book not found" << std::endl;
+            // output_ << "Book not found" << std::endl;
             return true;
         }
         else {
@@ -699,7 +720,9 @@ std::optional<std::string> View::SelectAuthorAdvanced(std::optional<std::string>
     if(!std::getline(input_, str) || str.empty())
     {
         // empty logic
+        output_ << "Select author:" << std::endl;
         PrintVector(output_, authors);
+        output_ << "Enter author number or empty line to cancel:" << std::endl;
         std::string str_list;
         if (!std::getline(input_, str_list) || str_list.empty()) {
             return std::nullopt;

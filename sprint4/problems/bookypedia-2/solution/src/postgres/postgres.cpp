@@ -67,20 +67,41 @@ void AuthorRepositoryImpl::EditBook(const show_single_book_t& book_data, const s
 {
     pqxx::work work{connection_};
     work.exec("START TRANSACTION;");
-    work.exec("UPDATE books SET title=" + work.quote(book_data.title) + " WHERE id=" + work.quote(book_id) + " ;");
+    work.exec("LOCK TABLE books in ACCESS EXCLUSIVE MODE;");
+    work.exec("UPDATE books SET title=" + work.quote(book_data.title) + ", publication_year=" + work.quote(std::to_string(book_data.publication_year)) + " WHERE id=" + work.quote(book_id) + " ;");
     
-    work.exec("UPDATE books SET publication_year=" + work.quote(std::to_string(book_data.publication_year)) + " WHERE id=" + work.quote(book_id) + " ;");
+    // work.exec("UPDATE books SET publication_year=" + work.quote(std::to_string(book_data.publication_year)) + " WHERE id=" + work.quote(book_id) + " ;");
+    
     if(book_data.tags.size() > 0)
     {
         work.exec("DELETE FROM book_tags WHERE book_id=" + work.quote(book_id) + " ;");
-        for(auto& item : book_data.tags)
+        // for(auto& item : book_data.tags)
+        // {
+        //     work.exec_params(
+        //         R"(
+        //     INSERT INTO book_tags (book_id, tag) VALUES ($1, $2);
+        //     )"_zv,
+        //         book_id, item);
+        // }
+        std::string query_text("INSERT INTO book_tags (book_id, tag) VALUES ");
+        for(int i = 0; i < book_data.tags.size(); i++)
         {
-            work.exec_params(
-                R"(
-            INSERT INTO book_tags (book_id, tag) VALUES ($1, $2);
-            )"_zv,
-                book_id, item);
+            query_text.append("(" + work.quote(book_id) + "," + work.quote(book_data.tags[i]) + ")");
+            if(i == book_data.tags.size()-1)
+            {
+                query_text.append(";");
+            }
+            else
+            {
+                query_text.append(",");   
+            }
+            // work.exec_params(
+            //     R"(
+            // INSERT INTO book_tags (book_id, tag) VALUES ($1, $2);
+            // )"_zv,
+            //     book.GetId().ToString(), tags_local);
         }
+        work.exec(query_text);
     }
     else if(book_data.tags.size() == 0)
     {
@@ -211,6 +232,8 @@ void AuthorRepositoryImpl::SaveBook(const domain::Author& author, const domain::
         query_text.append("INSERT INTO book_tags (book_id, tag) VALUES ");
         for(int i = 0; i < tags_local.size(); i++)
         {
+            // if(tags_local[i].empty() || tags_local[i] == ", , , , ")
+            //     continue;
             query_text.append("(" + work.quote(book.GetId().ToString()) + "," + work.quote(tags_local[i]) + ")");
             if(i == tags_local.size()-1)
             {
@@ -234,12 +257,14 @@ show_single_book_t AuthorRepositoryImpl::ShowBook(const std::string& book_id)
     // std::chrono::milliseconds timespan(100); // or whatever
     // std::this_thread::sleep_for(timespan);
     pqxx::read_transaction read_trans(connection_);
-    show_single_book_t ret = {};
+    show_single_book_t ret;
     auto first_row = read_trans.query1<std::string, std::string, int>("SELECT books.title, authors.name, books.publication_year FROM authors, books WHERE authors.id=books.author_id AND books.id=" + read_trans.quote(book_id) + " ;");
     ret.title = std::get<0>(first_row);
     ret.author_name = std::get<1>(first_row);
     ret.publication_year = std::get<2>(first_row);
-    for (auto [tags] : read_trans.query<std::string>("SELECT tag FROM book_tags WHERE book_id=" + read_trans.quote(book_id) + " ;")) {
+    for (auto [tags] : read_trans.query<std::string>("SELECT tag FROM book_tags WHERE book_id=" + read_trans.quote(book_id) + ";")) {
+        if(tags.empty())
+            continue;
         ret.tags.push_back(tags);
         // std::cout << tags << std::endl;
     }
