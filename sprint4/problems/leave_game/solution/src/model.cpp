@@ -232,7 +232,7 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms, Players& player
             processed_items.resize(finded_gather_elm.size());
             for( auto find_gat_it = finded_gather_elm.begin(); find_gat_it != finded_gather_elm.end(); find_gat_it++)
             {
-                if(dogs.size() > map_cap)
+                if(dogs.size() > map_cap-1)
                     continue;
                 if(loot_objs[find_gat_it->item_id]->type_  == LOOT_TYPE_BASE)
                 {
