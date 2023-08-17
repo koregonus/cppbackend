@@ -47,7 +47,8 @@ void DumpLeftDogsToDatabase(pqxx::connection& conn, std::vector<model::DogLeftDu
         R"(
 INSERT INTO retired_players (id, name, score, playtime) VALUES ($1, $2, $3, $4)
 )"_zv,
-        util::detail::UUIDToString(util::detail::NewUUID()), iter->name, iter->score, (iter->play_time_ms > 0 ? iter->play_time_ms : 0));
+        util::detail::UUIDToString(util::detail::NewUUID()), iter->name, iter->score, iter->play_time_ms);
+		// std::cout << iter->play_time_ms << std::endl;
 	}
 	work.commit();
 }

@@ -389,7 +389,7 @@ public:
         return dog_name;
     }
 
-    const std::vector<std::shared_ptr<DoggyLoot>>& GetLootBag() const noexcept
+    const std::vector<DoggyLoot>& GetLootBag() const noexcept
     {
         return LootBag;
     }
@@ -465,14 +465,17 @@ public:
 
     void AddToLootBag(int id, int type)
     {
-        LootBag.push_back(std::make_shared<DoggyLoot>(id,type));
+        LootBag.push_back({id, type});
     }
 
     void ClearLootBag()
     {
+        if(LootBag.empty())
+            return;
+
         for(auto it = LootBag.begin(); it != LootBag.end(); it++)
         {
-            AddToScore(map_ptr_->GetLootValue((*it)->type));
+            AddToScore(map_ptr_->GetLootValue((*it).type));
         }
         LootBag.clear();
     }
@@ -499,7 +502,7 @@ public:
     }
 
 private:
-    std::vector<std::shared_ptr<DoggyLoot>> LootBag;
+    std::vector<DoggyLoot> LootBag;
     Dog_mv_param coords_;
     static int dog_count;
     size_t current_road_idx = 0;
@@ -581,7 +584,7 @@ public:
     }
 
     void EraseDogById(int id);
-    
+
 
     void EraseLootObj(int idx)
     {

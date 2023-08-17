@@ -528,7 +528,7 @@ namespace http_handler {
         }
         else if(!decoded_req_target.compare(0, RECORDS_BASED.size(), RECORDS_BASED))
         {
-            if(decoded_req_target.size() > RECORDS_BASED.size())
+            if(decoded_req_target.size() > RECORDS_BASED.size() && decoded_req_target[RECORDS_BASED.size()] == '?')
             {
                 std::string str_params(decoded_req_target.substr(RECORDS_BASED.size()+1, decoded_req_target.size()));
                 int delim_pos = 0;
@@ -542,7 +542,7 @@ namespace http_handler {
                 delim_pos++;
                 int start_pos = delim_pos;
                 int start_width = 0;
-                while(str_params[delim_pos] != ',')
+                while(str_params[delim_pos] != '&')
                 {
                     delim_pos++;
                     start_width++;
@@ -569,7 +569,8 @@ namespace http_handler {
             }
             else
             {
-                ret = json_response(http::status::bad_request, R"({"code": "badRequest", "message": "Bad Request"})"sv, true, AllowedMethods::ALLOW_POST); 
+
+                ret = AppFacade.GetRecordsFromDB(req, 0, 100);
             }
         }
         else

@@ -152,7 +152,7 @@ StringResponse ApplicationFacade::GetRecordsFromDB(const StringRequest& req, int
 	}
 	else
 	{
-		ret = MakeStringResponse(http::status::ok, R"({})"sv,
+		ret = MakeStringResponse(http::status::ok, R"([])"sv,
 											 req.version(), req.keep_alive(), req.method(), true, ContentType::APP_JSON, AllowedMethods::ALLOW_GET_HEAD);
 	}
 	return ret;
@@ -201,7 +201,7 @@ StringResponse ApplicationFacade::PlayersState(const StringRequest& req)
     				json::array loot_bag_items;
     				for(auto bag_it = loot_bag.begin(); bag_it != loot_bag.end(); bag_it++)
     				{
-    					loot_bag_items.push_back(json::object{{"id",(*bag_it)->id},{"type",(*bag_it)->type}});
+    					loot_bag_items.push_back(json::object{{"id",(*bag_it).id},{"type",(*bag_it).type}});
     				}
     				local_obj["bag"] = loot_bag_items;
     			}
@@ -356,19 +356,11 @@ StringResponse ApplicationFacade::SetPlayerAction(const StringRequest& req) {
 				std::vector<model::DogLeftDump> check_dogs;
 				game_.UpdateSessionsTime(tick_ms, players_, check_dogs);
 				TryBackupTimer(static_cast<int>(tick_ms.count()));
-				auto connect_db = conn_pool_.GetConnection();
 				if(check_dogs.size() > 0)
 				{
+					auto connect_db = conn_pool_.GetConnection();
 					postgres::DumpLeftDogsToDatabase(*connect_db, check_dogs);
 				}
-				// for(auto iter = check_dogs.begin(); iter != check_dogs.end(); iter++)
-				// {
-				// 	std::cout << "id :" << iter->id << std::endl;
-				// 	std::cout << "name :" << iter->name << std::endl;
-				// 	std::cout << "scores :" << iter->score << std::endl;
-				// 	std::cout << "playTime :" << iter->play_time_ms << std::endl;
-				// }
-
 
 				if(normal_mode)
 				{

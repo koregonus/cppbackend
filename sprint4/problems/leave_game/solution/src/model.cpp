@@ -156,11 +156,11 @@ void GameSession::UpdateDogs(double tick_ms)
 
 std::pair<double, double> GameSession::GetRandomPointOnMap()
 {
-    auto roads = map_ptr_->GetRoads();
     std::chrono::system_clock::time_point cur_ts = std::chrono::system_clock::now();
     std::chrono::system_clock::time_point time_point_nano = std::chrono::time_point_cast<std::chrono::nanoseconds>(cur_ts);
     int seed = time_point_nano.time_since_epoch().count();
     std::srand(seed);
+    auto roads = map_ptr_->GetRoads();
     int del = (roads.size());
     if(del == 0)
         del = 1;
@@ -186,8 +186,7 @@ std::pair<double, double> GameSession::GetRandomPointOnMap()
         x_d = static_cast<double>(start_p.x);
     }
 
-    std::pair<double, double> ret{x_d, y_d};
-    return ret;
+    return std::pair<double, double> {x_d, y_d};
 }
 
 void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms, Players& players, std::vector<DogLeftDump>& vec_left_dog)
@@ -197,31 +196,30 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms, Players& player
     {
         return;
     }
+    auto time_limit_base = (*(sessions_.begin()))->GetMap();
+    int time_limit = time_limit_base->GetDogRetTime();
+    std::chrono::system_clock::time_point cur_ts = std::chrono::system_clock::now();
+    std::chrono::system_clock::time_point time_point_nano = std::chrono::time_point_cast<std::chrono::nanoseconds>(cur_ts);
+    int seed = time_point_nano.time_since_epoch().count();
+    std::srand(seed);
+
     for(auto it = sessions_.begin(); it < sessions_.end(); it++)
     {
         auto dogs = (*it)->GetDogs();
+        if(dogs.size() == 0)
+            continue;
         auto loot_objs = (*it)->GetLootObjs();
         int base_count = (*it)->GetCountOfBases();
         unsigned count = loot_g_->Generate(tick_ms, loot_objs.size() - base_count, dogs.size());
         auto map_ptr = (*it)->GetMap();
         auto rand_types = map_ptr->GetLootObjsCount();
-        auto time_limit = map_ptr->GetDogRetTime();
         for(int i = 0; i < count; i++)
-        {
-            std::chrono::system_clock::time_point cur_ts = std::chrono::system_clock::now();
-            std::chrono::system_clock::time_point time_point_nano = std::chrono::time_point_cast<std::chrono::nanoseconds>(cur_ts);
-            int seed = time_point_nano.time_since_epoch().count();
-            auto coords_for_loot = (*it)->GetRandomPointOnMap();
-            std::srand(seed);
+        {     
+            auto coords_for_loot = (*it)->GetRandomPointOnMap();   
             auto type = rand()%rand_types;
             (*it)->AddLootObj(type, coords_for_loot.first, coords_for_loot.second, ITEM_WIDTH, map_ptr->GetLootValue(type), false);
         }
         (*it)->UpdateDogs(make_tick);
-        vec_left_dog = players.CheckPlayers(time_limit);
-        for(auto dogs_left = vec_left_dog.begin(); dogs_left != vec_left_dog.end(); dogs_left++)
-        {
-            (*it)->EraseDogById(dogs_left->id);
-        }
         auto finded_gather_elm = collision_detector::FindGatherEvents(*(*it));
         if(finded_gather_elm.size() == 0)
         {
@@ -234,6 +232,8 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms, Players& player
             processed_items.resize(finded_gather_elm.size());
             for( auto find_gat_it = finded_gather_elm.begin(); find_gat_it != finded_gather_elm.end(); find_gat_it++)
             {
+                if(dogs.size() > map_cap)
+                    continue;
                 if(loot_objs[find_gat_it->item_id]->type_  == LOOT_TYPE_BASE)
                 {
                     // clear bag logic
@@ -248,15 +248,16 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms, Players& player
                     {
                         continue;
                     }
-
                     // check if item already processed
                     bool alredyProcessed = false;
                     for(auto it_local_proc = processed_items.begin(); it_local_proc != processed_items.end(); it_local_proc++)
                     {
                         if(*it_local_proc == find_gat_it->item_id)
+                        {
                             alredyProcessed = true;
-                    }
-                    
+                            break;
+                        }
+                    }                    
                     // process item:
                     if(alredyProcessed)
                     {
@@ -264,12 +265,12 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms, Players& player
                     }
                     else
                     {
-                        // append to loot bag
+                    // append to loot bag
                         dogs[find_gat_it->gatherer_id]->AddToLootBag(find_gat_it->item_id, 
                                                                     loot_objs[find_gat_it->item_id]->type_);
-                        // append to processed list
+                    // append to processed list
                         processed_items.push_back(find_gat_it->item_id);
-                        // erase processed element
+                    // erase processed element
                         (*it)->EraseLootObj(find_gat_it->item_id);
                     }
                 }
@@ -277,6 +278,15 @@ void Game::UpdateSessionsTime(std::chrono::milliseconds tick_ms, Players& player
         }
 
     }
+    vec_left_dog = players.CheckPlayers(time_limit);
+    for(auto it = sessions_.begin(); it < sessions_.end(); it++)
+    {
+        for(auto dogs_left = vec_left_dog.begin(); dogs_left != vec_left_dog.end(); dogs_left++)
+        {
+            (*it)->EraseDogById(dogs_left->id);
+        } 
+    }
+    
 }
 
 std::shared_ptr<Dog> GameSession::AddDog(std::string name, double x, double y, const model::Map* map_ptr, int idx)
@@ -309,19 +319,20 @@ std::shared_ptr<Dog> GameSession::AddDog(std::shared_ptr<Dog> restored_doggy)
 
 void Dog::Update(double tick_ms)
 {
-    if(coords_.vx == 0.0 && coords_.vy == 0.0)
+    if(coords_.vx == 0.0 && coords_.vy == 0.0 || coords_.direction == DogDirection::DOG_MOVE_STOP)
     {
+        coords_.vx == 0.0;
+        coords_.vy == 0.0;
         retireTime += (tick_ms/1000);
+        playTime += (tick_ms/1000);
+        return;
     }
     else
     {
         retireTime = 0.0;
-        playTime += (tick_ms); 
+        playTime += (tick_ms/1000); 
     }
-    if(coords_.direction == DogDirection::DOG_MOVE_STOP)
-    {
-        return;
-    }
+
     int lag_count = 0;
     double tick_buff = 0.0;
     double tick_tail = 0.0;
@@ -505,9 +516,9 @@ std::vector<model::DogLeftDump> Players::CheckPlayers(double limit)
     for(auto iter = players_.begin(); iter != players_.end();)
     {
         auto doggy = (*iter)->GetDog();
-        if(doggy->GetDogRetTime() > limit)
+        if(static_cast<int>(1000*doggy->GetDogRetTime()) >= static_cast<int>(1000*limit))
         {
-            ret.push_back({*(doggy->GetId()), doggy->GetName(), doggy->GetScore(), static_cast<int>((doggy->GetPlayTime()*1000 - doggy->GetDogRetTime()))});
+            ret.push_back({*(doggy->GetId()), doggy->GetName(), doggy->GetScore(), static_cast<int>(doggy->GetPlayTime())});
             players_map.erase((*iter)->GetToken());
             players_.erase(iter);
         }

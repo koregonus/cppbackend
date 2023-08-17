@@ -56,7 +56,7 @@ public:
         auto loot_bag = dog.GetLootBag();
         for(const auto& item : loot_bag)
         {
-            bag_content_.push_back(model::DoggyLoot(item->id, item->type));
+            bag_content_.push_back(model::DoggyLoot(item.id, item.type));
         }
     }
 

@@ -27,11 +27,6 @@
 #include "postgres.h"
 #include <pqxx/pqxx>
 
-// #include "model_serialization.h"
-
-// #include <boost/archive/text_oarchive.hpp>
-// #include <boost/archive/text_iarchive.hpp>
-
 using namespace std::literals;
 namespace net = boost::asio;
 namespace json = boost::json;
@@ -149,7 +144,7 @@ int main(int argc, const char* argv[]) {
                     throw std::runtime_error("GAME_DB_URL is not specified");
                 }
 
-                postgres::ConnectionPool conn_pool{num_threads, [db_url] {
+                postgres::ConnectionPool conn_pool{12, [db_url] {
                                      auto conn = std::make_shared<pqxx::connection>(db_url);
                                      return conn;
                                  }};
