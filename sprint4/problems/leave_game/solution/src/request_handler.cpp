@@ -1,23 +1,19 @@
-#include "request_handler.h"
-
-#include "tagged.h"
-
 #include <map>
+#include <optional>
 
 #include <boost/json.hpp>
 
-#include <optional>
+#include "request_handler.h"
+#include "tagged.h"
+#include "application.h"
+#include "http_req_resp_support.h"
+#include "application_support.h"
 
 namespace json = boost::json;
 
-#include "application.h"
-
-#include "http_req_resp_support.h"
-
-#include "application_support.h"
-
 namespace http_handler {
 
+    using namespace req_resp_support;
 
     const std::map<std::string, std::string> static_parse_map {{".htm", "text/html"},
                                                         {".html", "text/html"},
@@ -167,15 +163,15 @@ namespace http_handler {
             json::object road_local;
             if((*it).IsHorizontal())
             {
-                road_local["x0"] = point_start.x;
-                road_local["y0"] = point_start.y;
-                road_local["x1"] = point_end.x;
+                road_local[X0_COORD_MARKER] = point_start.x;
+                road_local[Y0_COORD_MARKER] = point_start.y;
+                road_local[X1_COORD_MARKER] = point_end.x;
             }
             else
             {
-                road_local["x0"] = point_start.x;
-                road_local["y0"] = point_start.y;
-                road_local["y1"] = point_end.y;
+                road_local[X0_COORD_MARKER] = point_start.x;
+                road_local[Y0_COORD_MARKER] = point_start.y;
+                road_local[Y1_COORD_MARKER] = point_end.y;
             }
             roads.push_back(road_local);
         }
@@ -191,8 +187,8 @@ namespace http_handler {
         {
             model::Rectangle rect = (*it).GetBounds();
             json::object build_obj;
-            build_obj["x"] = rect.position.x;
-            build_obj["y"] = rect.position.y;
+            build_obj[X_COORD_MARKER] = rect.position.x;
+            build_obj[Y_COORD_MARKER] = rect.position.y;
             build_obj["w"] = rect.size.width;
             build_obj["h"] = rect.size.height;
             buildings.push_back(build_obj);
@@ -214,8 +210,8 @@ namespace http_handler {
             json::object office_obj;
         
             office_obj["id"] = *id;
-            office_obj["x"] = pos.x;
-            office_obj["y"] = pos.y;
+            office_obj[X_COORD_MARKER] = pos.x;
+            office_obj[Y_COORD_MARKER] = pos.y;
             office_obj["offsetX"] = offset.dx;
             office_obj["offsetY"] = offset.dy;
         

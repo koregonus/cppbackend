@@ -2,28 +2,19 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
 #include <random>
-
-#include "tagged.h"
-
 #include <chrono>
-
 #include <map>
-
 #include <iomanip>
-
 #include <memory>
-
 #include <iostream>
-
 #include <optional>
 
+#include "tagged.h"
 #include "application_support.h"
-
 #include "collision_detector.h"
-
 #include "geom.h"
+
 
 namespace model {
 
@@ -54,6 +45,7 @@ constexpr int LOOT_TYPE_BASE = -1;
 constexpr double PLAYER_WIDTH = 0.6;
 constexpr double BASE_AKA_OFFICE_WIDTH = 0.5;
 constexpr double ITEM_WIDTH = 0.0;
+constexpr int MS_IN_SECOND = 1000;
 
 struct Point {
     Coord x, y;
@@ -131,20 +123,20 @@ public:
     }
 
     double LeftBound() const noexcept {
-        return (((double)(start_.x <= end_.x)?start_.x:end_.x) - DELTA_ROAD_SIZE_PARAMETER);
+        return ((static_cast<double>(start_.x <= end_.x)?start_.x:end_.x) - DELTA_ROAD_SIZE_PARAMETER);
     }
 
     double RightBound() const noexcept{
-        return (((double)(start_.x <= end_.x)?end_.x:start_.x) + DELTA_ROAD_SIZE_PARAMETER);
+        return ((static_cast<double>(start_.x <= end_.x)?end_.x:start_.x) + DELTA_ROAD_SIZE_PARAMETER);
     }
 
     double UpBound() const noexcept{
-        return (((double)(start_.y <= end_.y)?start_.y:end_.y) - DELTA_ROAD_SIZE_PARAMETER);
+        return ((static_cast<double>(start_.y <= end_.y)?start_.y:end_.y) - DELTA_ROAD_SIZE_PARAMETER);
         
     }
 
     double LowBound() const noexcept{
-        return (((double)(start_.y <= end_.y)?end_.y:start_.y) + DELTA_ROAD_SIZE_PARAMETER);
+        return ((static_cast<double>(start_.y <= end_.y)?end_.y:start_.y) + DELTA_ROAD_SIZE_PARAMETER);
     }
 
     bool PointIsWithinRoad(double x, double y) const;

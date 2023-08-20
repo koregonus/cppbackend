@@ -27,8 +27,9 @@ namespace json = boost::json;
 
 namespace application {
 
-std::optional<std::string> TryExtractToken(const StringRequest& request);
-	
+	using namespace req_resp_support;
+
+	std::optional<std::string> TryExtractToken(const StringRequest& request);
 
 	template <typename Fn>
 	StringResponse ExecuteAuthorized(const StringRequest& request, Fn&& action) 

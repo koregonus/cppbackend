@@ -18,9 +18,13 @@ namespace json_loader {
 
     using namespace std::chrono_literals;
 
-    static std::string json_as_string(const std::filesystem::path& json_path)
+    static std::string JsonAsString(const std::filesystem::path& json_path)
     {
         std::ifstream ifs(json_path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+        if (!ifs)
+        {
+            throw std::runtime_error("JSON config path does not exist");
+        }
         std::ifstream::pos_type fileSize = ifs.tellg();
         ifs.seekg(0, std::ios::beg);
 
@@ -30,7 +34,7 @@ namespace json_loader {
         return std::string(bytes.data(), fileSize);
     }
 
-    static void add_roads_to_game(const json::value& map, model::Map& local_map) {
+    static void AddRoadsToGame(const json::value& map, model::Map& local_map) {
         if(map.as_object().if_contains("roads"))
         {
             auto roads_array = map.at("roads").as_array();
@@ -62,7 +66,7 @@ namespace json_loader {
         }
     }
 
-    static void add_buildings_to_game(const json::value& map, model::Map& local_map) {
+    static void AddBuildingsToGame(const json::value& map, model::Map& local_map) {
         if(map.as_object().if_contains("buildings"))
         {
             auto buildings_array = map.at("buildings").as_array();
@@ -83,7 +87,7 @@ namespace json_loader {
         }
     }
 
-    static void add_offices_to_game(const json::value& map, model::Map& local_map) {
+    static void AddOfficesToGame(const json::value& map, model::Map& local_map) {
         if(map.as_object().if_contains("offices"))
         {
             auto offices_array = map.at("offices").as_array();
@@ -120,9 +124,9 @@ namespace json_loader {
 
         model::Map local_map(id, *map_name);
 
-        add_roads_to_game(map, local_map);
-        add_buildings_to_game(map, local_map);
-        add_offices_to_game(map, local_map);
+        AddRoadsToGame(map, local_map);
+        AddBuildingsToGame(map, local_map);
+        AddOfficesToGame(map, local_map);
 
         // Добавляем предельное время ожидания для карты
         local_map.SetDogRetTime(defaultDogRetirementTime);
@@ -159,7 +163,7 @@ namespace json_loader {
         // Загрузить содержимое файла json_path, например, в виде строки
         // Распарсить строку как JSON, используя boost::json::parse
         // Загрузить модель игры из файла
-        std::string json_from_file = json_as_string(json_path);
+        std::string json_from_file = JsonAsString(json_path);
 
         auto value = json::parse(json_from_file);
 

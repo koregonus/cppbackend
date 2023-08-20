@@ -32,7 +32,7 @@ std::optional<std::string> TryExtractToken(const StringRequest& request)
        	return received_token;
    	} catch(...)
    	{
-       	return std::nullopt;
+		return std::nullopt;
    	}
 }
 
@@ -53,7 +53,7 @@ bool TryExtractNotMatchContentType(const StringRequest& request)
 }
 
 
-static std::string consider_dog_direction(int dir)
+static std::string ConsiderDogDirection(int dir)
 {
 	std::string ret;
 	if(dir == model::DogDirection::DOG_MOVE_UP)
@@ -75,9 +75,8 @@ static std::string consider_dog_direction(int dir)
 StringResponse ApplicationFacade::ListMap(const StringRequest req)
 {
 	auto maps = game_.GetMaps();
-
 	json::array arr;
-    
+
     for(int i = 0; i < maps.size(); i++)
     {
         json::object local_obj;
@@ -192,7 +191,7 @@ StringResponse ApplicationFacade::PlayersState(const StringRequest& req)
     			local_obj["pos"] = arr_pos;
     			local_obj["speed"] = arr_speed;
     			if(params.direction < 4)
-    				local_obj["dir"] = consider_dog_direction(params.direction);
+    				local_obj["dir"] = ConsiderDogDirection(params.direction);
     			else
     				local_obj["dir"] = "";
     			auto loot_bag = dogs[i]->GetLootBag();

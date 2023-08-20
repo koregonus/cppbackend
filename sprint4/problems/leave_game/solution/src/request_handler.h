@@ -1,7 +1,4 @@
 #pragma once
-#include "http_server.h"
-#include "model.h"
-#include "json_loader.h"
 #include <filesystem>
 #include <variant>
 
@@ -13,17 +10,15 @@
 #include <boost/log/utility/manipulators/add_value.hpp>
 #include <boost/date_time.hpp>
 #include <boost/log/utility/setup/console.hpp>
-
 #include <boost/asio.hpp>
-
 #include <boost/json.hpp>
 
+#include "http_server.h"
+#include "model.h"
+#include "json_loader.h"
 #include "application.h"
-
 #include "http_req_resp_support.h"
-
 #include "application_support.h"
-
 
 namespace http_handler {
 namespace json = boost::json;
@@ -64,7 +59,12 @@ constexpr static std::string_view TIMER_TICK_BASED = "/api/v1/game/tick"sv;
 constexpr static std::string_view RECORDS_BASED = "/api/v1/game/records"sv;
 constexpr int API_PATH_LEN = 5;
 
-
+constexpr static char X_COORD_MARKER[] = "x";
+constexpr static char X0_COORD_MARKER[] = "x0";
+constexpr static char X1_COORD_MARKER[] = "x1";
+constexpr static char Y_COORD_MARKER[] = "y";
+constexpr static char Y0_COORD_MARKER[] = "y0";
+constexpr static char Y1_COORD_MARKER[] = "y1";
 
 std::string decode_uri(std::basic_string_view<char> target_from_target);
 

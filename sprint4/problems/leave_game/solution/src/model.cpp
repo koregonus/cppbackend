@@ -323,14 +323,14 @@ void Dog::Update(double tick_ms)
     {
         coords_.vx == 0.0;
         coords_.vy == 0.0;
-        retireTime += (tick_ms/1000);
-        playTime += (tick_ms/1000);
+        retireTime += (tick_ms / MS_IN_SECOND);
+        playTime += (tick_ms / MS_IN_SECOND);
         return;
     }
     else
     {
         retireTime = 0.0;
-        playTime += (tick_ms/1000); 
+        playTime += (tick_ms / MS_IN_SECOND); 
     }
 
     int lag_count = 0;
@@ -361,8 +361,8 @@ void Dog::Update(double tick_ms)
             break;
         }
 
-        double dx = coords_.vx * (tick_buff)/1000.0; // tick_buff from millisec to sec
-        double dy = coords_.vy * (tick_buff)/1000.0; // tick_buff from millisec to sec
+        double dx = coords_.vx * (tick_buff) / MS_IN_SECOND; // tick_buff from millisec to sec
+        double dy = coords_.vy * (tick_buff) / MS_IN_SECOND; // tick_buff from millisec to sec
 
         double next_p_x = coords_.x + dx;
         double next_p_y = coords_.y + dy;
@@ -516,7 +516,7 @@ std::vector<model::DogLeftDump> Players::CheckPlayers(double limit)
     for(auto iter = players_.begin(); iter != players_.end();)
     {
         auto doggy = (*iter)->GetDog();
-        if(static_cast<int>(1000*doggy->GetDogRetTime()) >= static_cast<int>(1000*limit))
+        if(static_cast<int>(MS_IN_SECOND * doggy->GetDogRetTime()) >= static_cast<int>(MS_IN_SECOND * limit))
         {
             ret.push_back({*(doggy->GetId()), doggy->GetName(), doggy->GetScore(), static_cast<int>(doggy->GetPlayTime())});
             players_map.erase((*iter)->GetToken());
